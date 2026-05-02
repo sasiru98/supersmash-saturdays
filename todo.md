@@ -24,27 +24,7 @@ A dedicated stats tab or section on the public page showing per-player and group
 - Stats update on every Publish
 
 
-## 2. Cross-Skill Team Ranking System
-
-A full team leaderboard on the public page, ranked by combined performance across all three groups.
-
-### Ranking formula
-- **Primary:** Total wins across all three pairs (Sun pair + Moon pair + Stars pair)
-- **Tiebreaker:** Combined point differential across all three pairs
-
-### Display
-- Dedicated leaderboard section above or below the Cross-Skill Teams grid
-- Show rank, team name, total wins, combined point diff
-- 🥇🥈🥉 medals for top 3 (already implemented on team cards and in group standings)
-- Clicking/tapping a team could expand to show each pair's individual record
-
-### Implementation notes
-- `calc_team_standings()` already exists in generate_index.py — leaderboard just needs a rendered HTML section
-- Update on every Publish
-- Only rank teams once at least one match has been played (avoid misleading 0-0 ties at start)
-
-
-## 3. Player Skill Dictionary
+## 2. Player Skill Dictionary
 
 A persistent skill registry that carries ratings forward across multiple sessions. After each tournament, ratings are automatically adjusted based on final standings within each group.
 
