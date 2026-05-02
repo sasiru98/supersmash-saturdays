@@ -4,752 +4,710 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Supersmash Saturdays</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            green: {
-              400: '#4ade80',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-              800: '#166534',
-              900: '#14532d',
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
   <style>
-    body { background-color: #111827; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
-    .shuttle { display: inline-block; }
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    body { background: #080d14; color: #f1f5f9; }
+    .hero-glow { background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34,197,94,0.12), transparent); }
   </style>
 </head>
-<body class="min-h-screen bg-gray-900 text-gray-100">
+<body class="min-h-screen">
 
-  <!-- Header -->
-  <header class="bg-gray-800 border-b border-green-900/50 sticky top-0 z-10 shadow-lg">
-    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-black text-green-400 tracking-tight">🏸 Supersmash Saturdays</h1>
-        <p class="text-xs text-gray-400">Live Tournament Standings</p>
-      </div>
-      <div class="text-right text-xs text-gray-500">
-        <div id="last-updated">—</div>
+  <!-- Hero Header -->
+  <header class="relative overflow-hidden border-b border-white/5">
+    <div class="hero-glow absolute inset-0 pointer-events-none"></div>
+    <div class="relative max-w-2xl mx-auto px-4 pt-8 pb-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-2xl">🏸</span>
+            <span class="text-xs font-semibold uppercase tracking-[0.2em] text-green-500">Live Tournament</span>
+          </div>
+          <h1 class="text-3xl font-black text-white tracking-tight leading-none">Supersmash<br/><span class="text-green-400">Saturdays</span></h1>
+        </div>
+        <div class="text-right mt-1">
+          <div class="text-xs text-slate-600 mb-0.5">Last updated</div>
+          <div id="last-updated" class="text-xs font-semibold text-slate-400">—</div>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="max-w-2xl mx-auto px-4 py-6">
 
-    <!-- Teams Section -->
-    <section class="mb-8">
-      <h2 class="text-xl font-bold text-gray-200 mb-3 flex items-center gap-2">
-        <span>🤝</span> Cross-Skill Teams
-      </h2>
-      <div class="grid gap-3">
+    <!-- Teams -->
+    <section class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
+        <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Cross-Skill Teams</h2>
+        <div class="h-px flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
+      </div>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         
-        <div class="bg-gray-800 rounded-xl p-4 border border-green-900/40">
-          <h3 class="text-green-400 font-bold text-lg mb-3">Bengaza boys</h3>
-          <div class="space-y-1 text-sm">
+        <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
+          <div class="text-base font-bold text-white mb-3">Bengaza boys</div>
+          <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-green-700/40 text-green-300 px-2 py-0.5 rounded">Advanced</span>
-              <span class="text-gray-200">Marcus Chen &amp; Ryan Kowalski</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Advanced</span>
+              <span class="text-xs text-slate-300">Marcus Chen &amp; Ryan Kowalski</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-blue-700/40 text-blue-300 px-2 py-0.5 rounded">Intermediate</span>
-              <span class="text-gray-200">Noah Patel &amp; Isabelle Dubois</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Intermed.</span>
+              <span class="text-xs text-slate-300">Noah Patel &amp; Isabelle Dubois</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-yellow-700/40 text-yellow-300 px-2 py-0.5 rounded">Beginner</span>
-              <span class="text-gray-200">Grace Osei &amp; Chris Yamamoto</span>
-            </div>
-          </div>
-        </div>
-        <div class="bg-gray-800 rounded-xl p-4 border border-green-900/40">
-          <h3 class="text-green-400 font-bold text-lg mb-3">No name</h3>
-          <div class="space-y-1 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-green-700/40 text-green-300 px-2 py-0.5 rounded">Advanced</span>
-              <span class="text-gray-200">Priya Sharma &amp; Zara Ahmed</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-blue-700/40 text-blue-300 px-2 py-0.5 rounded">Intermediate</span>
-              <span class="text-gray-200">Emma Johansson &amp; Louis Bernard</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-yellow-700/40 text-yellow-300 px-2 py-0.5 rounded">Beginner</span>
-              <span class="text-gray-200">Kevin Tran &amp; Leila Nkosi</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Beginner</span>
+              <span class="text-xs text-slate-300">Grace Osei &amp; Chris Yamamoto</span>
             </div>
           </div>
         </div>
-        <div class="bg-gray-800 rounded-xl p-4 border border-green-900/40">
-          <h3 class="text-green-400 font-bold text-lg mb-3">Kasun is absent</h3>
-          <div class="space-y-1 text-sm">
+        <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
+          <div class="text-base font-bold text-white mb-3">No name</div>
+          <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-green-700/40 text-green-300 px-2 py-0.5 rounded">Advanced</span>
-              <span class="text-gray-200">James Okafor &amp; Liam Novak</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Advanced</span>
+              <span class="text-xs text-slate-300">Priya Sharma &amp; Zara Ahmed</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-blue-700/40 text-blue-300 px-2 py-0.5 rounded">Intermediate</span>
-              <span class="text-gray-200">Carlos Diaz &amp; Ava Christensen</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Intermed.</span>
+              <span class="text-xs text-slate-300">Emma Johansson &amp; Louis Bernard</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-yellow-700/40 text-yellow-300 px-2 py-0.5 rounded">Beginner</span>
-              <span class="text-gray-200">Olivia Murphy &amp; Tom Hughes</span>
-            </div>
-          </div>
-        </div>
-        <div class="bg-gray-800 rounded-xl p-4 border border-green-900/40">
-          <h3 class="text-green-400 font-bold text-lg mb-3">Team 4</h3>
-          <div class="space-y-1 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-green-700/40 text-green-300 px-2 py-0.5 rounded">Advanced</span>
-              <span class="text-gray-200">Yuki Tanaka &amp; Aisha Mwangi</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-blue-700/40 text-blue-300 px-2 py-0.5 rounded">Intermediate</span>
-              <span class="text-gray-200">Mei Lin &amp; Ben Nakamura</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-yellow-700/40 text-yellow-300 px-2 py-0.5 rounded">Beginner</span>
-              <span class="text-gray-200">Sam Fletcher &amp; Amara Diallo</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Beginner</span>
+              <span class="text-xs text-slate-300">Kevin Tran &amp; Leila Nkosi</span>
             </div>
           </div>
         </div>
-        <div class="bg-gray-800 rounded-xl p-4 border border-green-900/40">
-          <h3 class="text-green-400 font-bold text-lg mb-3">Team 5</h3>
-          <div class="space-y-1 text-sm">
+        <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
+          <div class="text-base font-bold text-white mb-3">Kasun is absent</div>
+          <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-green-700/40 text-green-300 px-2 py-0.5 rounded">Advanced</span>
-              <span class="text-gray-200">Sofia Reyes &amp; Daniel Park</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Advanced</span>
+              <span class="text-xs text-slate-300">James Okafor &amp; Liam Novak</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-blue-700/40 text-blue-300 px-2 py-0.5 rounded">Intermediate</span>
-              <span class="text-gray-200">Trevor Wilson &amp; Fatima Hassan</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Intermed.</span>
+              <span class="text-xs text-slate-300">Carlos Diaz &amp; Ava Christensen</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-yellow-700/40 text-yellow-300 px-2 py-0.5 rounded">Beginner</span>
-              <span class="text-gray-200">Jade Morrison &amp; Raj Kapoor</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Beginner</span>
+              <span class="text-xs text-slate-300">Olivia Murphy &amp; Tom Hughes</span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
+          <div class="text-base font-bold text-white mb-3">Team 4</div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Advanced</span>
+              <span class="text-xs text-slate-300">Yuki Tanaka &amp; Aisha Mwangi</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Intermed.</span>
+              <span class="text-xs text-slate-300">Mei Lin &amp; Ben Nakamura</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Beginner</span>
+              <span class="text-xs text-slate-300">Sam Fletcher &amp; Amara Diallo</span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
+          <div class="text-base font-bold text-white mb-3">Team 5</div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Advanced</span>
+              <span class="text-xs text-slate-300">Sofia Reyes &amp; Daniel Park</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Intermed.</span>
+              <span class="text-xs text-slate-300">Trevor Wilson &amp; Fatima Hassan</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Beginner</span>
+              <span class="text-xs text-slate-300">Jade Morrison &amp; Raj Kapoor</span>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Group Sections -->
+    <!-- Group sections -->
     
-      <!-- Advanced Section -->
       <section class="mb-10">
-        <h2 class="text-2xl font-bold text-green-400 mb-4 flex items-center gap-2">
-          <span class="text-3xl">🏸</span> Advanced
-        </h2>
+        <!-- Section header -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-px flex-1 bg-gradient-to-r from-green-900/40 to-transparent"></div>
+          <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-green-400">Advanced</h2>
+          <div class="h-px flex-1 bg-gradient-to-l from-green-900/40 to-transparent"></div>
+        </div>
 
         <!-- Standings -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Standings</h3>
+        <div class="bg-white/[0.03] border border-green-900/30 rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Standings</span>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full">
               <thead>
-                <tr class="text-gray-400 text-xs border-b border-gray-700 bg-gray-800/80">
-                  <th class="py-2 px-2 text-center">#</th>
-                  <th class="py-2 px-3 text-left">Pair</th>
-                  <th class="py-2 px-2 text-center">W</th>
-                  <th class="py-2 px-2 text-center">L</th>
-                  <th class="py-2 px-2 text-center">PF</th>
-                  <th class="py-2 px-2 text-center">PA</th>
-                  <th class="py-2 px-2 text-center">+/-</th>
+                <tr class="border-b border-white/5">
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold w-8">#</th>
+                  <th class="py-2 px-3 text-left text-[10px] uppercase tracking-wider text-slate-600 font-semibold">Pair</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">W</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">L</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PF</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PA</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">+/−</th>
                 </tr>
               </thead>
               <tbody>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">1</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Priya Sharma & Zara Ahmed</span><span class="text-xs text-green-400 ml-1">(No name)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥇</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Priya Sharma & Zara Ahmed</span><span class="text-xs bg-green-950/60 text-green-300 px-1.5 py-0.5 rounded-md font-medium ml-1">No name</span>
           </td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">21</td>
-          <td class="py-2 px-2 text-center">11</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">+10</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400">1</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">21</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">11</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400 text-sm">+10</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">2</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">James Okafor & Liam Novak</span><span class="text-xs text-green-400 ml-1">(Kasun is absent)</span>
+        <tr class="border-b border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥈</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">James Okafor & Liam Novak</span><span class="text-xs bg-green-950/60 text-green-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Kasun is absent</span>
           </td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">21</td>
-          <td class="py-2 px-2 text-center">19</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">+2</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400">1</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">21</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">19</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400 text-sm">+2</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">3</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Sofia Reyes & Daniel Park</span><span class="text-xs text-green-400 ml-1">(Team 5)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥉</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Sofia Reyes & Daniel Park</span><span class="text-xs bg-green-950/60 text-green-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Team 5</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">4</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Yuki Tanaka & Aisha Mwangi</span><span class="text-xs text-green-400 ml-1">(Team 4)</span>
+        <tr class="border-b border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-slate-500 font-semibold text-sm">4</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Yuki Tanaka & Aisha Mwangi</span><span class="text-xs bg-green-950/60 text-green-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Team 4</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center">19</td>
-          <td class="py-2 px-2 text-center">21</td>
-          <td class="py-2 px-2 text-center font-semibold text-red-400">-2</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">1</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">19</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">21</td>
+          <td class="py-2.5 px-3 text-center font-bold text-red-400 text-sm">-2</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">5</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Marcus Chen & Ryan Kowalski</span><span class="text-xs text-green-400 ml-1">(Bengaza boys)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-slate-500 font-semibold text-sm">5</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Marcus Chen & Ryan Kowalski</span><span class="text-xs bg-green-950/60 text-green-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Bengaza boys</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center">11</td>
-          <td class="py-2 px-2 text-center">21</td>
-          <td class="py-2 px-2 text-center font-semibold text-red-400">-10</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">1</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">11</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">21</td>
+          <td class="py-2.5 px-3 text-center font-bold text-red-400 text-sm">-10</td>
         </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Match Results Grid -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Results Grid</h3>
+        <!-- Results Grid -->
+        <div class="bg-white/[0.03] border border-green-900/30 rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Results Grid</span>
           </div>
           <div class="p-3">
-            
-    <div class="overflow-x-auto mt-4">
+    <div class="overflow-x-auto">
       <table class="text-sm w-full border-collapse">
-        <thead><tr class="border-b border-gray-600"><th class="p-2 text-xs text-gray-400"></th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Priya<br/>&amp;<br/>Zara</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">James<br/>&amp;<br/>Liam</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Sofia<br/>&amp;<br/>Daniel</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Yuki<br/>&amp;<br/>Aisha</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Marcus<br/>&amp;<br/>Ryan</th></tr></thead>
-        <tbody><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Priya & Zara</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-xs text-green-400 font-semibold">21–11</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">James & Liam</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-xs text-green-400 font-semibold">21–19</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Sofia & Daniel</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Yuki & Aisha</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-xs text-red-400 font-semibold">19–21</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Marcus & Ryan</td><td class="p-2 text-center text-xs text-red-400 font-semibold">11–21</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td></tr></tbody>
+        <thead><tr class="border-b border-white/10"><th class="p-2"></th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Priya<br/>&amp;<br/>Zara</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">James<br/>&amp;<br/>Liam</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Sofia<br/>&amp;<br/>Daniel</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Yuki<br/>&amp;<br/>Aisha</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Marcus<br/>&amp;<br/>Ryan</th></tr></thead>
+        <tbody><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Priya &amp; Zara</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-1 text-center"><span class="inline-block bg-green-950/50 text-green-300 rounded-md px-1.5 py-0.5 text-xs font-bold">21–11</span></td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">James &amp; Liam</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-1 text-center"><span class="inline-block bg-green-950/50 text-green-300 rounded-md px-1.5 py-0.5 text-xs font-bold">21–19</span></td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Sofia &amp; Daniel</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Yuki &amp; Aisha</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-1 text-center"><span class="inline-block bg-red-950/50 text-red-400 rounded-md px-1.5 py-0.5 text-xs font-bold">19–21</span></td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Marcus &amp; Ryan</td><td class="p-1 text-center"><span class="inline-block bg-red-950/50 text-red-400 rounded-md px-1.5 py-0.5 text-xs font-bold">11–21</span></td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td></tr></tbody>
       </table>
-    </div>
-          </div>
+    </div></div>
         </div>
 
         <!-- Schedule -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Schedule</h3>
+        <div class="bg-white/[0.03] border border-green-900/30 rounded-2xl overflow-hidden">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Schedule</span>
           </div>
-          <div class="p-4">
-            
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 1</h4>
+          <div class="p-3">
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-600">Round 1</span><span class="text-xs text-slate-700 ml-2">Complete</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Marcus Chen & Ryan Kowalski</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Priya Sharma & Zara Ahmed</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-green-400 font-bold">11–21</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Marcus Chen & Ryan Kowalski</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-400">11</span><span class="text-slate-600 mx-1">–</span><span class="font-bold text-green-400">21</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Priya Sharma & Zara Ahmed</span>
             </div>
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">James Okafor & Liam Novak</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Yuki Tanaka & Aisha Mwangi</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-green-400 font-bold">21–19</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">James Okafor & Liam Novak</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="font-bold text-green-400">21</span><span class="text-slate-600 mx-1">–</span><span class="text-slate-400">19</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Yuki Tanaka & Aisha Mwangi</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-green-300 font-semibold text-sm mb-2">Round 2 <span class="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full ml-1">Current</span></h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-bold text-slate-200">Round 2</span><span class="text-green-400 bg-green-950/60 border-green-900/50 border text-xs font-semibold px-2 py-0.5 rounded-full ml-2">Live</span></div>
           
-            <div class="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Marcus Chen & Ryan Kowalski</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">James Okafor & Liam Novak</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Marcus Chen & Ryan Kowalski</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">James Okafor & Liam Novak</span>
             </div>
-            <div class="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Priya Sharma & Zara Ahmed</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Yuki Tanaka & Aisha Mwangi</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Priya Sharma & Zara Ahmed</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Yuki Tanaka & Aisha Mwangi</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 3</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 3</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Marcus Chen & Ryan Kowalski</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Yuki Tanaka & Aisha Mwangi</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Marcus Chen & Ryan Kowalski</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Yuki Tanaka & Aisha Mwangi</span>
             </div>
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Priya Sharma & Zara Ahmed</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">James Okafor & Liam Novak</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Priya Sharma & Zara Ahmed</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">James Okafor & Liam Novak</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 4</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 4</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Marcus Chen & Ryan Kowalski</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Sofia Reyes & Daniel Park</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Marcus Chen & Ryan Kowalski</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Sofia Reyes & Daniel Park</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 5</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 5</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Priya Sharma & Zara Ahmed</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Sofia Reyes & Daniel Park</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Priya Sharma & Zara Ahmed</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Sofia Reyes & Daniel Park</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 6</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 6</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">James Okafor & Liam Novak</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Sofia Reyes & Daniel Park</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">James Okafor & Liam Novak</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Sofia Reyes & Daniel Park</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 7</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 7</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Yuki Tanaka & Aisha Mwangi</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Sofia Reyes & Daniel Park</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Yuki Tanaka & Aisha Mwangi</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Sofia Reyes & Daniel Park</span>
             </div>
-        </div>
-          </div>
+        </div></div>
         </div>
       </section>
-      <!-- Intermediate Section -->
       <section class="mb-10">
-        <h2 class="text-2xl font-bold text-blue-400 mb-4 flex items-center gap-2">
-          <span class="text-3xl">🏸</span> Intermediate
-        </h2>
+        <!-- Section header -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-px flex-1 bg-gradient-to-r from-blue-900/40 to-transparent"></div>
+          <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-blue-400">Intermediate</h2>
+          <div class="h-px flex-1 bg-gradient-to-l from-blue-900/40 to-transparent"></div>
+        </div>
 
         <!-- Standings -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Standings</h3>
+        <div class="bg-white/[0.03] border border-blue-900/30 rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Standings</span>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full">
               <thead>
-                <tr class="text-gray-400 text-xs border-b border-gray-700 bg-gray-800/80">
-                  <th class="py-2 px-2 text-center">#</th>
-                  <th class="py-2 px-3 text-left">Pair</th>
-                  <th class="py-2 px-2 text-center">W</th>
-                  <th class="py-2 px-2 text-center">L</th>
-                  <th class="py-2 px-2 text-center">PF</th>
-                  <th class="py-2 px-2 text-center">PA</th>
-                  <th class="py-2 px-2 text-center">+/-</th>
+                <tr class="border-b border-white/5">
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold w-8">#</th>
+                  <th class="py-2 px-3 text-left text-[10px] uppercase tracking-wider text-slate-600 font-semibold">Pair</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">W</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">L</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PF</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PA</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">+/−</th>
                 </tr>
               </thead>
               <tbody>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">1</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Noah Patel & Isabelle Dubois</span><span class="text-xs text-green-400 ml-1">(Bengaza boys)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥇</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Noah Patel & Isabelle Dubois</span><span class="text-xs bg-blue-950/60 text-blue-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Bengaza boys</span>
           </td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">10</td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">+9</td>
+          <td class="py-2.5 px-3 text-center font-bold text-blue-400">1</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">10</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">1</td>
+          <td class="py-2.5 px-3 text-center font-bold text-green-400 text-sm">+9</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">2</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Carlos Diaz & Ava Christensen</span><span class="text-xs text-green-400 ml-1">(Kasun is absent)</span>
+        <tr class="border-b border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥈</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Carlos Diaz & Ava Christensen</span><span class="text-xs bg-blue-950/60 text-blue-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Kasun is absent</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-blue-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">3</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Mei Lin & Ben Nakamura</span><span class="text-xs text-green-400 ml-1">(Team 4)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥉</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Mei Lin & Ben Nakamura</span><span class="text-xs bg-blue-950/60 text-blue-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Team 4</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-blue-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">4</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Trevor Wilson & Fatima Hassan</span><span class="text-xs text-green-400 ml-1">(Team 5)</span>
+        <tr class="border-b border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-slate-500 font-semibold text-sm">4</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Trevor Wilson & Fatima Hassan</span><span class="text-xs bg-blue-950/60 text-blue-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Team 5</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-blue-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">5</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Emma Johansson & Louis Bernard</span><span class="text-xs text-green-400 ml-1">(No name)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-slate-500 font-semibold text-sm">5</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Emma Johansson & Louis Bernard</span><span class="text-xs bg-blue-950/60 text-blue-300 px-1.5 py-0.5 rounded-md font-medium ml-1">No name</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center">1</td>
-          <td class="py-2 px-2 text-center">10</td>
-          <td class="py-2 px-2 text-center font-semibold text-red-400">-9</td>
+          <td class="py-2.5 px-3 text-center font-bold text-blue-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">1</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">1</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">10</td>
+          <td class="py-2.5 px-3 text-center font-bold text-red-400 text-sm">-9</td>
         </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Match Results Grid -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Results Grid</h3>
+        <!-- Results Grid -->
+        <div class="bg-white/[0.03] border border-blue-900/30 rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Results Grid</span>
           </div>
           <div class="p-3">
-            
-    <div class="overflow-x-auto mt-4">
+    <div class="overflow-x-auto">
       <table class="text-sm w-full border-collapse">
-        <thead><tr class="border-b border-gray-600"><th class="p-2 text-xs text-gray-400"></th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Noah<br/>&amp;<br/>Isabelle</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Carlos<br/>&amp;<br/>Ava</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Mei<br/>&amp;<br/>Ben</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Trevor<br/>&amp;<br/>Fatima</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Emma<br/>&amp;<br/>Louis</th></tr></thead>
-        <tbody><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Noah & Isabelle</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-xs text-green-400 font-semibold">10–1</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Carlos & Ava</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Mei & Ben</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Trevor & Fatima</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Emma & Louis</td><td class="p-2 text-center text-xs text-red-400 font-semibold">1–10</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td></tr></tbody>
+        <thead><tr class="border-b border-white/10"><th class="p-2"></th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Noah<br/>&amp;<br/>Isabelle</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Carlos<br/>&amp;<br/>Ava</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Mei<br/>&amp;<br/>Ben</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Trevor<br/>&amp;<br/>Fatima</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Emma<br/>&amp;<br/>Louis</th></tr></thead>
+        <tbody><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Noah &amp; Isabelle</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-1 text-center"><span class="inline-block bg-green-950/50 text-green-300 rounded-md px-1.5 py-0.5 text-xs font-bold">10–1</span></td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Carlos &amp; Ava</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Mei &amp; Ben</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Trevor &amp; Fatima</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Emma &amp; Louis</td><td class="p-1 text-center"><span class="inline-block bg-red-950/50 text-red-400 rounded-md px-1.5 py-0.5 text-xs font-bold">1–10</span></td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td></tr></tbody>
       </table>
-    </div>
-          </div>
+    </div></div>
         </div>
 
         <!-- Schedule -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Schedule</h3>
+        <div class="bg-white/[0.03] border border-blue-900/30 rounded-2xl overflow-hidden">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Schedule</span>
           </div>
-          <div class="p-4">
-            
-        <div class="mb-3">
-          <h4 class="text-green-300 font-semibold text-sm mb-2">Round 1 <span class="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full ml-1">Current</span></h4>
+          <div class="p-3">
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-bold text-slate-200">Round 1</span><span class="text-blue-400 bg-blue-950/60 border-blue-900/50 border text-xs font-semibold px-2 py-0.5 rounded-full ml-2">Live</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Noah Patel & Isabelle Dubois</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Emma Johansson & Louis Bernard</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-green-400 font-bold">10–1</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Noah Patel & Isabelle Dubois</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="font-bold text-green-400">10</span><span class="text-slate-600 mx-1">–</span><span class="text-slate-400">1</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Emma Johansson & Louis Bernard</span>
             </div>
-            <div class="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Carlos Diaz & Ava Christensen</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Mei Lin & Ben Nakamura</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Carlos Diaz & Ava Christensen</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Mei Lin & Ben Nakamura</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 2</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 2</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Noah Patel & Isabelle Dubois</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Carlos Diaz & Ava Christensen</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Noah Patel & Isabelle Dubois</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Carlos Diaz & Ava Christensen</span>
             </div>
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Emma Johansson & Louis Bernard</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Mei Lin & Ben Nakamura</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Emma Johansson & Louis Bernard</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Mei Lin & Ben Nakamura</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 3</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 3</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Noah Patel & Isabelle Dubois</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Mei Lin & Ben Nakamura</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Noah Patel & Isabelle Dubois</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Mei Lin & Ben Nakamura</span>
             </div>
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Emma Johansson & Louis Bernard</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Carlos Diaz & Ava Christensen</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Emma Johansson & Louis Bernard</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Carlos Diaz & Ava Christensen</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 4</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 4</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Noah Patel & Isabelle Dubois</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Trevor Wilson & Fatima Hassan</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Noah Patel & Isabelle Dubois</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Trevor Wilson & Fatima Hassan</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 5</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 5</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Emma Johansson & Louis Bernard</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Trevor Wilson & Fatima Hassan</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Emma Johansson & Louis Bernard</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Trevor Wilson & Fatima Hassan</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 6</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 6</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Carlos Diaz & Ava Christensen</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Trevor Wilson & Fatima Hassan</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Carlos Diaz & Ava Christensen</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Trevor Wilson & Fatima Hassan</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 7</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 7</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Mei Lin & Ben Nakamura</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Trevor Wilson & Fatima Hassan</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Mei Lin & Ben Nakamura</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Trevor Wilson & Fatima Hassan</span>
             </div>
-        </div>
-          </div>
+        </div></div>
         </div>
       </section>
-      <!-- Beginner Section -->
       <section class="mb-10">
-        <h2 class="text-2xl font-bold text-yellow-400 mb-4 flex items-center gap-2">
-          <span class="text-3xl">🏸</span> Beginner
-        </h2>
+        <!-- Section header -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-px flex-1 bg-gradient-to-r from-amber-900/40 to-transparent"></div>
+          <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-amber-400">Beginner</h2>
+          <div class="h-px flex-1 bg-gradient-to-l from-amber-900/40 to-transparent"></div>
+        </div>
 
         <!-- Standings -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Standings</h3>
+        <div class="bg-white/[0.03] border border-amber-900/30 rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Standings</span>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full">
               <thead>
-                <tr class="text-gray-400 text-xs border-b border-gray-700 bg-gray-800/80">
-                  <th class="py-2 px-2 text-center">#</th>
-                  <th class="py-2 px-3 text-left">Pair</th>
-                  <th class="py-2 px-2 text-center">W</th>
-                  <th class="py-2 px-2 text-center">L</th>
-                  <th class="py-2 px-2 text-center">PF</th>
-                  <th class="py-2 px-2 text-center">PA</th>
-                  <th class="py-2 px-2 text-center">+/-</th>
+                <tr class="border-b border-white/5">
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold w-8">#</th>
+                  <th class="py-2 px-3 text-left text-[10px] uppercase tracking-wider text-slate-600 font-semibold">Pair</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">W</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">L</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PF</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PA</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">+/−</th>
                 </tr>
               </thead>
               <tbody>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">1</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Grace Osei & Chris Yamamoto</span><span class="text-xs text-green-400 ml-1">(Bengaza boys)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥇</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Grace Osei & Chris Yamamoto</span><span class="text-xs bg-amber-950/60 text-amber-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Bengaza boys</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-amber-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">2</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Kevin Tran & Leila Nkosi</span><span class="text-xs text-green-400 ml-1">(No name)</span>
+        <tr class="border-b border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥈</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Kevin Tran & Leila Nkosi</span><span class="text-xs bg-amber-950/60 text-amber-300 px-1.5 py-0.5 rounded-md font-medium ml-1">No name</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-amber-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">3</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Olivia Murphy & Tom Hughes</span><span class="text-xs text-green-400 ml-1">(Kasun is absent)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-base">🥉</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Olivia Murphy & Tom Hughes</span><span class="text-xs bg-amber-950/60 text-amber-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Kasun is absent</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-amber-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">4</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Sam Fletcher & Amara Diallo</span><span class="text-xs text-green-400 ml-1">(Team 4)</span>
+        <tr class="border-b border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-slate-500 font-semibold text-sm">4</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Sam Fletcher & Amara Diallo</span><span class="text-xs bg-amber-950/60 text-amber-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Team 4</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-amber-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">5</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">Jade Morrison & Raj Kapoor</span><span class="text-xs text-green-400 ml-1">(Team 5)</span>
+        <tr class="border-b border-white/5  hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center"><span class="text-slate-500 font-semibold text-sm">5</span></td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">Jade Morrison & Raj Kapoor</span><span class="text-xs bg-amber-950/60 text-amber-300 px-1.5 py-0.5 rounded-md font-medium ml-1">Team 5</span>
           </td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center">0</td>
-          <td class="py-2 px-2 text-center font-semibold text-green-400">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-amber-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">0</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-500 text-sm">0</td>
         </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Match Results Grid -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Results Grid</h3>
+        <!-- Results Grid -->
+        <div class="bg-white/[0.03] border border-amber-900/30 rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Results Grid</span>
           </div>
           <div class="p-3">
-            
-    <div class="overflow-x-auto mt-4">
+    <div class="overflow-x-auto">
       <table class="text-sm w-full border-collapse">
-        <thead><tr class="border-b border-gray-600"><th class="p-2 text-xs text-gray-400"></th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Grace<br/>&amp;<br/>Chris</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Kevin<br/>&amp;<br/>Leila</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Olivia<br/>&amp;<br/>Tom</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Sam<br/>&amp;<br/>Amara</th><th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">Jade<br/>&amp;<br/>Raj</th></tr></thead>
-        <tbody><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Grace & Chris</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Kevin & Leila</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Olivia & Tom</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Sam & Amara</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td><td class="p-2 text-center text-gray-600 text-xs">vs</td></tr><tr class='border-b border-gray-700/50'><td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">Jade & Raj</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center text-gray-600 text-xs">vs</td><td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td></tr></tbody>
+        <thead><tr class="border-b border-white/10"><th class="p-2"></th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Grace<br/>&amp;<br/>Chris</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Kevin<br/>&amp;<br/>Leila</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Olivia<br/>&amp;<br/>Tom</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Sam<br/>&amp;<br/>Amara</th><th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">Jade<br/>&amp;<br/>Raj</th></tr></thead>
+        <tbody><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Grace &amp; Chris</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Kevin &amp; Leila</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Olivia &amp; Tom</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Sam &amp; Amara</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td></tr><tr class='border-b border-white/5'><td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">Jade &amp; Raj</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-[10px]">·</td><td class="p-2 text-center text-slate-700 text-xs">—</td></tr></tbody>
       </table>
-    </div>
-          </div>
+    </div></div>
         </div>
 
         <!-- Schedule -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Schedule</h3>
+        <div class="bg-white/[0.03] border border-amber-900/30 rounded-2xl overflow-hidden">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Schedule</span>
           </div>
-          <div class="p-4">
-            
-        <div class="mb-3">
-          <h4 class="text-green-300 font-semibold text-sm mb-2">Round 1 <span class="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full ml-1">Current</span></h4>
+          <div class="p-3">
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-bold text-slate-200">Round 1</span><span class="text-amber-400 bg-amber-950/60 border-amber-900/50 border text-xs font-semibold px-2 py-0.5 rounded-full ml-2">Live</span></div>
           
-            <div class="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Grace Osei & Chris Yamamoto</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Kevin Tran & Leila Nkosi</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Grace Osei & Chris Yamamoto</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Kevin Tran & Leila Nkosi</span>
             </div>
-            <div class="flex items-center justify-between bg-green-900/20 border border-green-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Olivia Murphy & Tom Hughes</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Sam Fletcher & Amara Diallo</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Olivia Murphy & Tom Hughes</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Sam Fletcher & Amara Diallo</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 2</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 2</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Grace Osei & Chris Yamamoto</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Olivia Murphy & Tom Hughes</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Grace Osei & Chris Yamamoto</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Olivia Murphy & Tom Hughes</span>
             </div>
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Kevin Tran & Leila Nkosi</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Sam Fletcher & Amara Diallo</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Kevin Tran & Leila Nkosi</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Sam Fletcher & Amara Diallo</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 3</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 3</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Grace Osei & Chris Yamamoto</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Sam Fletcher & Amara Diallo</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Grace Osei & Chris Yamamoto</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Sam Fletcher & Amara Diallo</span>
             </div>
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Kevin Tran & Leila Nkosi</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Olivia Murphy & Tom Hughes</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Kevin Tran & Leila Nkosi</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Olivia Murphy & Tom Hughes</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 4</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 4</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Grace Osei & Chris Yamamoto</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Jade Morrison & Raj Kapoor</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Grace Osei & Chris Yamamoto</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Jade Morrison & Raj Kapoor</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 5</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 5</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Kevin Tran & Leila Nkosi</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Jade Morrison & Raj Kapoor</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Kevin Tran & Leila Nkosi</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Jade Morrison & Raj Kapoor</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 6</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 6</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Olivia Murphy & Tom Hughes</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Jade Morrison & Raj Kapoor</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Olivia Murphy & Tom Hughes</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Jade Morrison & Raj Kapoor</span>
             </div>
         </div>
-        <div class="mb-3">
-          <h4 class="text-gray-400 text-sm mb-2">Round 7</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Round 7</span></div>
           
-            <div class="flex items-center justify-between bg-gray-800/40 rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">Sam Fletcher & Amara Diallo</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">Jade Morrison & Raj Kapoor</span>
-              <span class="ml-3 min-w-[50px] text-right"><span class="text-gray-500 text-xs">TBD</span></span>
+            <div class="flex items-center bg-transparent border border-transparent rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">Sam Fletcher & Amara Diallo</span>
+              <span class="mx-3 text-sm font-mono shrink-0"><span class="text-slate-700 text-xs">TBD</span></span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">Jade Morrison & Raj Kapoor</span>
             </div>
-        </div>
-          </div>
+        </div></div>
         </div>
       </section>
 
   </main>
 
-  <footer class="text-center text-xs text-gray-600 pb-8 pt-4">
+  <footer class="text-center text-xs text-slate-700 pb-10 pt-4">
     Supersmash Saturdays &bull; Powered by rallies and good vibes
   </footer>
 
   <script>
     const now = new Date();
-    document.getElementById('last-updated').textContent = 'Updated ' + now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    document.getElementById('last-updated').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
   </script>
 </body>
 </html>

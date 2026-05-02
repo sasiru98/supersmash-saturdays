@@ -9,6 +9,9 @@ OUTPUT_FILE = "index.html"
 
 GROUP_ORDER = ["A", "B", "C"]
 GROUP_LABELS = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
+GROUP_ACCENT = {"A": "green", "B": "blue", "C": "amber"}
+
+RANK_MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
 
 
 def load_data():
@@ -55,7 +58,6 @@ def calc_standings(group_data):
 
 
 def find_current_round(rounds):
-    """Return the index of the first round with any unplayed matches."""
     for i, rnd in enumerate(rounds):
         for match in rnd:
             if match.get("score1") is None or match.get("score2") is None:
@@ -66,42 +68,51 @@ def find_current_round(rounds):
 def pair_display(pair_obj):
     players = pair_obj["players"]
     team = pair_obj.get("team") or ""
-    name = f"{players[0]} & {players[1]}"
-    return name, team
+    return f"{players[0]} & {players[1]}", team
 
 
-def standings_table(standings, group_data):
-    pairs = {p["id"]: p for p in group_data["pairs"]}
+def standings_table(standings, group_data, accent):
     rows = ""
+    accent_styles = {
+        "green": ("text-green-400", "text-green-300", "bg-green-950/60 text-green-300"),
+        "blue":  ("text-blue-400",  "text-blue-300",  "bg-blue-950/60 text-blue-300"),
+        "amber": ("text-amber-400", "text-amber-300", "bg-amber-950/60 text-amber-300"),
+    }
+    a_text, a_light, a_badge = accent_styles.get(accent, accent_styles["green"])
+
     for s in standings:
         pair_obj = s["pair"]
         name, team = pair_display(pair_obj)
         diff = s["pts_for"] - s["pts_against"]
         diff_str = f"+{diff}" if diff > 0 else str(diff)
-        team_badge = f'<span class="text-xs text-green-400 ml-1">({team})</span>' if team else ""
+        diff_color = "text-green-400" if diff > 0 else ("text-red-400" if diff < 0 else "text-slate-500")
+        medal = RANK_MEDALS.get(s["rank"], "")
+        rank_cell = f'<span class="text-base">{medal}</span>' if medal else f'<span class="text-slate-500 font-semibold text-sm">{s["rank"]}</span>'
+        team_badge = f'<span class="text-xs {a_badge} px-1.5 py-0.5 rounded-md font-medium ml-1">{team}</span>' if team else ""
+
+        row_bg = "bg-white/[0.02]" if s["rank"] % 2 == 0 else ""
         rows += f"""
-        <tr class="border-b border-gray-700 hover:bg-gray-700/40 transition-colors">
-          <td class="py-2 px-2 text-center font-bold text-green-400">{s['rank']}</td>
-          <td class="py-2 px-3">
-            <span class="font-medium">{name}</span>{team_badge}
+        <tr class="border-b border-white/5 {row_bg} hover:bg-white/[0.04] transition-colors">
+          <td class="py-2.5 px-3 text-center">{rank_cell}</td>
+          <td class="py-2.5 px-3">
+            <span class="font-semibold text-slate-200 text-sm">{name}</span>{team_badge}
           </td>
-          <td class="py-2 px-2 text-center">{s['W']}</td>
-          <td class="py-2 px-2 text-center">{s['L']}</td>
-          <td class="py-2 px-2 text-center">{s['pts_for']}</td>
-          <td class="py-2 px-2 text-center">{s['pts_against']}</td>
-          <td class="py-2 px-2 text-center font-semibold {('text-green-400' if diff >= 0 else 'text-red-400')}">{diff_str}</td>
+          <td class="py-2.5 px-3 text-center font-bold {a_text}">{s['W']}</td>
+          <td class="py-2.5 px-3 text-center text-slate-400">{s['L']}</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">{s['pts_for']}</td>
+          <td class="py-2.5 px-3 text-center text-slate-400 text-sm">{s['pts_against']}</td>
+          <td class="py-2.5 px-3 text-center font-bold {diff_color} text-sm">{diff_str}</td>
         </tr>"""
     return rows
 
 
-def match_grid(group_data, standings):
+def match_grid(group_data, standings, accent):
     pairs = group_data["pairs"]
     rounds = group_data["rounds"]
     n = len(pairs)
     if n < 2:
         return ""
 
-    # Build a score lookup: (pair_id_a, pair_id_b) -> (score_a, score_b)
     scores = {}
     for rnd in rounds:
         for match in rnd:
@@ -110,50 +121,64 @@ def match_grid(group_data, standings):
             scores[(p1, p2)] = (s1, s2)
             scores[(p2, p1)] = (s2, s1)
 
-    # Order pairs by rank
     ordered = [s["pair"] for s in standings]
 
-    header_cells = '<th class="p-2 text-xs text-gray-400"></th>'
+    header_cells = '<th class="p-2"></th>'
     for p in ordered:
-        short = p["players"][0].split()[0]
-        header_cells += f'<th class="p-2 text-xs text-gray-400 text-center min-w-[44px]">{short}<br/>&amp;<br/>{p["players"][1].split()[0]}</th>'
+        first = p["players"][0].split()[0]
+        last = p["players"][1].split()[0]
+        header_cells += f'<th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">{first}<br/>&amp;<br/>{last}</th>'
 
     rows = ""
     for row_pair in ordered:
-        row_name = f"{row_pair['players'][0].split()[0]} & {row_pair['players'][1].split()[0]}"
-        cells = f'<td class="p-2 text-xs font-medium text-gray-300 whitespace-nowrap">{row_name}</td>'
+        first_r = row_pair["players"][0].split()[0]
+        last_r = row_pair["players"][1].split()[0]
+        cells = f'<td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">{first_r} &amp; {last_r}</td>'
         for col_pair in ordered:
             if row_pair["id"] == col_pair["id"]:
-                cells += '<td class="p-2 text-center bg-gray-700/30 text-gray-600">—</td>'
+                cells += '<td class="p-2 text-center text-slate-700 text-xs">—</td>'
             else:
                 key = (row_pair["id"], col_pair["id"])
                 if key in scores and scores[key][0] is not None:
-                    s_row, s_col = scores[key]
-                    color = "text-green-400" if s_row > s_col else "text-red-400"
-                    cells += f'<td class="p-2 text-center text-xs {color} font-semibold">{s_row}–{s_col}</td>'
+                    s_r, s_c = scores[key]
+                    won = s_r > s_c
+                    bg = "bg-green-950/50 text-green-300" if won else "bg-red-950/50 text-red-400"
+                    cells += f'<td class="p-1 text-center"><span class="inline-block {bg} rounded-md px-1.5 py-0.5 text-xs font-bold">{s_r}–{s_c}</span></td>'
                 else:
-                    cells += '<td class="p-2 text-center text-gray-600 text-xs">vs</td>'
-        rows += f"<tr class='border-b border-gray-700/50'>{cells}</tr>"
+                    cells += '<td class="p-2 text-center text-slate-700 text-[10px]">·</td>'
+        rows += f"<tr class='border-b border-white/5'>{cells}</tr>"
 
     return f"""
-    <div class="overflow-x-auto mt-4">
+    <div class="overflow-x-auto">
       <table class="text-sm w-full border-collapse">
-        <thead><tr class="border-b border-gray-600">{header_cells}</tr></thead>
+        <thead><tr class="border-b border-white/10">{header_cells}</tr></thead>
         <tbody>{rows}</tbody>
       </table>
     </div>"""
 
 
-def rounds_section(group_data, current_round_idx):
+def rounds_section(group_data, current_round_idx, accent):
     pairs = {p["id"]: p for p in group_data["pairs"]}
     rounds = group_data["rounds"]
+    accent_map = {
+        "green": "text-green-400 bg-green-950/60 border-green-900/50",
+        "blue":  "text-blue-400 bg-blue-950/60 border-blue-900/50",
+        "amber": "text-amber-400 bg-amber-950/60 border-amber-900/50",
+    }
+    a_badge = accent_map.get(accent, accent_map["green"])
     html = ""
     for r_idx, rnd in enumerate(rounds):
         is_current = r_idx == current_round_idx
-        label = f"Round {r_idx + 1}"
+        all_done = all(m.get("score1") is not None and m.get("score2") is not None for m in rnd)
+
         if is_current:
-            label += ' <span class="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full ml-1">Current</span>'
-        header_class = "text-green-300 font-semibold" if is_current else "text-gray-400"
+            badge = f'<span class="{a_badge} border text-xs font-semibold px-2 py-0.5 rounded-full ml-2">Live</span>'
+            hdr = f'<span class="font-bold text-slate-200">Round {r_idx + 1}</span>{badge}'
+        elif all_done:
+            hdr = f'<span class="font-semibold text-slate-600">Round {r_idx + 1}</span><span class="text-xs text-slate-700 ml-2">Complete</span>'
+        else:
+            hdr = f'<span class="font-semibold text-slate-500">Round {r_idx + 1}</span>'
+
         match_rows = ""
         for match in rnd:
             p1 = pairs[match["pair1"]]
@@ -161,95 +186,96 @@ def rounds_section(group_data, current_round_idx):
             n1 = f"{p1['players'][0]} & {p1['players'][1]}"
             n2 = f"{p2['players'][0]} & {p2['players'][1]}"
             s1, s2 = match.get("score1"), match.get("score2")
-            if s1 is not None and s2 is not None:
-                score_display = f'<span class="text-green-400 font-bold">{s1}–{s2}</span>'
-            else:
-                score_display = '<span class="text-gray-500 text-xs">TBD</span>'
 
-            bg = "bg-green-900/20 border border-green-800/40" if is_current and s1 is None else "bg-gray-800/40"
+            if s1 is not None and s2 is not None:
+                if s1 > s2:
+                    score_html = f'<span class="font-bold text-green-400">{s1}</span><span class="text-slate-600 mx-1">–</span><span class="text-slate-400">{s2}</span>'
+                else:
+                    score_html = f'<span class="text-slate-400">{s1}</span><span class="text-slate-600 mx-1">–</span><span class="font-bold text-green-400">{s2}</span>'
+            else:
+                score_html = '<span class="text-slate-700 text-xs">TBD</span>'
+
+            live_bg = "bg-white/[0.03] border border-white/10" if is_current and s1 is None else "bg-transparent border border-transparent"
             match_rows += f"""
-            <div class="flex items-center justify-between {bg} rounded px-3 py-2 mb-1 text-sm">
-              <span class="text-gray-200 flex-1">{n1}</span>
-              <span class="mx-2 text-gray-500">vs</span>
-              <span class="text-gray-200 flex-1 text-right">{n2}</span>
-              <span class="ml-3 min-w-[50px] text-right">{score_display}</span>
+            <div class="flex items-center {live_bg} rounded-xl px-3 py-2 mb-1">
+              <span class="text-slate-300 text-sm flex-1 truncate">{n1}</span>
+              <span class="mx-3 text-sm font-mono shrink-0">{score_html}</span>
+              <span class="text-slate-300 text-sm flex-1 text-right truncate">{n2}</span>
             </div>"""
+
         html += f"""
-        <div class="mb-3">
-          <h4 class="{header_class} text-sm mb-2">{label}</h4>
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1">{hdr}</div>
           {match_rows}
         </div>"""
     return html
 
 
-def generate_index():
-    data = load_data()
-    teams = data.get("teams", [])
-
-    # Build teams section HTML
-    teams_html = ""
+def teams_grid(teams):
+    cards = ""
     for t in teams:
-        a = t["A"]
-        b = t["B"]
-        c = t["C"]
-        teams_html += f"""
-        <div class="bg-gray-800 rounded-xl p-4 border border-green-900/40">
-          <h3 class="text-green-400 font-bold text-lg mb-3">{t['name']}</h3>
-          <div class="space-y-1 text-sm">
+        a, b, c = t["A"], t["B"], t["C"]
+        cards += f"""
+        <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
+          <div class="text-base font-bold text-white mb-3">{t['name']}</div>
+          <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-green-700/40 text-green-300 px-2 py-0.5 rounded">Advanced</span>
-              <span class="text-gray-200">{a[0]} &amp; {a[1]}</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Advanced</span>
+              <span class="text-xs text-slate-300">{a[0]} &amp; {a[1]}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-blue-700/40 text-blue-300 px-2 py-0.5 rounded">Intermediate</span>
-              <span class="text-gray-200">{b[0]} &amp; {b[1]}</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Intermed.</span>
+              <span class="text-xs text-slate-300">{b[0]} &amp; {b[1]}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs bg-yellow-700/40 text-yellow-300 px-2 py-0.5 rounded">Beginner</span>
-              <span class="text-gray-200">{c[0]} &amp; {c[1]}</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Beginner</span>
+              <span class="text-xs text-slate-300">{c[0]} &amp; {c[1]}</span>
             </div>
           </div>
         </div>"""
+    return cards
 
-    # Build group sections
-    group_sections = ""
-    for g in GROUP_ORDER:
-        if g not in data["groups"]:
-            continue
-        gd = data["groups"][g]
-        label = GROUP_LABELS[g]
-        standings = calc_standings(gd)
-        current_round = find_current_round(gd["rounds"])
-        st_rows = standings_table(standings, gd)
-        grid = match_grid(gd, standings)
-        rounds_html = rounds_section(gd, current_round)
 
-        color_map = {"A": "green", "B": "blue", "C": "yellow"}
-        c = color_map[g]
+def group_section(g, gd, accent):
+    label = GROUP_LABELS[g]
+    standings = calc_standings(gd)
+    current_round = find_current_round(gd["rounds"])
+    st_rows = standings_table(standings, gd, accent)
+    grid = match_grid(gd, standings, accent)
+    rounds_html = rounds_section(gd, current_round, accent)
 
-        group_sections += f"""
-      <!-- {label} Section -->
+    accent_styles = {
+        "green": ("from-green-900/40 to-transparent", "text-green-400", "border-green-900/30"),
+        "blue":  ("from-blue-900/40 to-transparent",  "text-blue-400",  "border-blue-900/30"),
+        "amber": ("from-amber-900/40 to-transparent", "text-amber-400", "border-amber-900/30"),
+    }
+    grad, a_text, a_border = accent_styles.get(accent, accent_styles["green"])
+
+    return f"""
       <section class="mb-10">
-        <h2 class="text-2xl font-bold text-{c}-400 mb-4 flex items-center gap-2">
-          <span class="text-3xl">🏸</span> {label}
-        </h2>
+        <!-- Section header -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-px flex-1 bg-gradient-to-r {grad}"></div>
+          <h2 class="text-sm font-bold uppercase tracking-[0.15em] {a_text}">{label}</h2>
+          <div class="h-px flex-1 bg-gradient-to-l {grad}"></div>
+        </div>
 
         <!-- Standings -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Standings</h3>
+        <div class="bg-white/[0.03] border {a_border} rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Standings</span>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full">
               <thead>
-                <tr class="text-gray-400 text-xs border-b border-gray-700 bg-gray-800/80">
-                  <th class="py-2 px-2 text-center">#</th>
-                  <th class="py-2 px-3 text-left">Pair</th>
-                  <th class="py-2 px-2 text-center">W</th>
-                  <th class="py-2 px-2 text-center">L</th>
-                  <th class="py-2 px-2 text-center">PF</th>
-                  <th class="py-2 px-2 text-center">PA</th>
-                  <th class="py-2 px-2 text-center">+/-</th>
+                <tr class="border-b border-white/5">
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold w-8">#</th>
+                  <th class="py-2 px-3 text-left text-[10px] uppercase tracking-wider text-slate-600 font-semibold">Pair</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">W</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">L</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PF</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">PA</th>
+                  <th class="py-2 px-3 text-center text-[10px] uppercase tracking-wider text-slate-600 font-semibold">+/−</th>
                 </tr>
               </thead>
               <tbody>{st_rows}
@@ -258,26 +284,34 @@ def generate_index():
           </div>
         </div>
 
-        <!-- Match Results Grid -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden mb-4 border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Results Grid</h3>
+        <!-- Results Grid -->
+        <div class="bg-white/[0.03] border {a_border} rounded-2xl overflow-hidden mb-3">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Results Grid</span>
           </div>
-          <div class="p-3">
-            {grid}
-          </div>
+          <div class="p-3">{grid}</div>
         </div>
 
         <!-- Schedule -->
-        <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-          <div class="px-4 py-3 bg-gray-700/50 border-b border-gray-600">
-            <h3 class="font-semibold text-gray-200">Schedule</h3>
+        <div class="bg-white/[0.03] border {a_border} rounded-2xl overflow-hidden">
+          <div class="px-4 py-2.5 border-b border-white/5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Schedule</span>
           </div>
-          <div class="p-4">
-            {rounds_html}
-          </div>
+          <div class="p-3">{rounds_html}</div>
         </div>
       </section>"""
+
+
+def generate_index():
+    data = load_data()
+    teams = data.get("teams", [])
+
+    t_cards = teams_grid(teams)
+    group_sections = ""
+    for g in GROUP_ORDER:
+        if g not in data["groups"]:
+            continue
+        group_sections += group_section(g, data["groups"][g], GROUP_ACCENT[g])
 
     html = f"""<!DOCTYPE html>
 <html lang="en" class="dark">
@@ -285,70 +319,64 @@ def generate_index():
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Supersmash Saturdays</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {{
-      darkMode: 'class',
-      theme: {{
-        extend: {{
-          colors: {{
-            green: {{
-              400: '#4ade80',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-              800: '#166534',
-              900: '#14532d',
-            }}
-          }}
-        }}
-      }}
-    }}
-  </script>
+  <script>tailwind.config = {{ darkMode: 'class' }}</script>
   <style>
-    body {{ background-color: #111827; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }}
-    .shuttle {{ display: inline-block; }}
+    * {{ font-family: 'Inter', system-ui, sans-serif; }}
+    body {{ background: #080d14; color: #f1f5f9; }}
+    .hero-glow {{ background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34,197,94,0.12), transparent); }}
   </style>
 </head>
-<body class="min-h-screen bg-gray-900 text-gray-100">
+<body class="min-h-screen">
 
-  <!-- Header -->
-  <header class="bg-gray-800 border-b border-green-900/50 sticky top-0 z-10 shadow-lg">
-    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-black text-green-400 tracking-tight">🏸 Supersmash Saturdays</h1>
-        <p class="text-xs text-gray-400">Live Tournament Standings</p>
-      </div>
-      <div class="text-right text-xs text-gray-500">
-        <div id="last-updated">—</div>
+  <!-- Hero Header -->
+  <header class="relative overflow-hidden border-b border-white/5">
+    <div class="hero-glow absolute inset-0 pointer-events-none"></div>
+    <div class="relative max-w-2xl mx-auto px-4 pt-8 pb-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-2xl">🏸</span>
+            <span class="text-xs font-semibold uppercase tracking-[0.2em] text-green-500">Live Tournament</span>
+          </div>
+          <h1 class="text-3xl font-black text-white tracking-tight leading-none">Supersmash<br/><span class="text-green-400">Saturdays</span></h1>
+        </div>
+        <div class="text-right mt-1">
+          <div class="text-xs text-slate-600 mb-0.5">Last updated</div>
+          <div id="last-updated" class="text-xs font-semibold text-slate-400">—</div>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="max-w-2xl mx-auto px-4 py-6">
 
-    <!-- Teams Section -->
-    <section class="mb-8">
-      <h2 class="text-xl font-bold text-gray-200 mb-3 flex items-center gap-2">
-        <span>🤝</span> Cross-Skill Teams
-      </h2>
-      <div class="grid gap-3">
-        {teams_html}
+    <!-- Teams -->
+    <section class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
+        <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Cross-Skill Teams</h2>
+        <div class="h-px flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
+      </div>
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {t_cards}
       </div>
     </section>
 
-    <!-- Group Sections -->
+    <!-- Group sections -->
     {group_sections}
 
   </main>
 
-  <footer class="text-center text-xs text-gray-600 pb-8 pt-4">
+  <footer class="text-center text-xs text-slate-700 pb-10 pt-4">
     Supersmash Saturdays &bull; Powered by rallies and good vibes
   </footer>
 
   <script>
     const now = new Date();
-    document.getElementById('last-updated').textContent = 'Updated ' + now.toLocaleTimeString([], {{hour: '2-digit', minute: '2-digit'}});
+    document.getElementById('last-updated').textContent = now.toLocaleTimeString([], {{hour: '2-digit', minute: '2-digit'}});
   </script>
 </body>
 </html>"""

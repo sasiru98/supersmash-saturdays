@@ -4,96 +4,123 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Supersmash Saturdays</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: {} }
-    }
-  </script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
   <style>
-    body { background-color: #111827; color: #f3f4f6; }
-    input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    body { background: #080d14; color: #f1f5f9; }
+
+    /* Score inputs */
     .score-input {
-      width: 52px; text-align: center; background: #1f2937;
-      border: 1px solid #374151; border-radius: 6px;
-      color: #f3f4f6; padding: 4px 6px; font-size: 16px;
+      width: 48px; height: 48px;
+      text-align: center;
+      background: #0f172a;
+      border: 1.5px solid #1e293b;
+      border-radius: 10px;
+      color: #f1f5f9;
+      font-size: 20px;
+      font-weight: 700;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .score-input:focus { outline: none; border-color: #4ade80; }
-    .saved-flash { animation: flashGreen 0.6s ease-out; }
-    @keyframes flashGreen {
-      0% { background-color: rgba(74, 222, 128, 0.2); }
-      100% { background-color: transparent; }
+    .score-input:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
     }
-    .tab-btn.active { background: #16a34a; color: white; }
-    .tab-btn { transition: background 0.15s; }
+    input[type=number]::-webkit-inner-spin-button { opacity: 0; }
+
+    /* Flash animation on save */
+    @keyframes flashSave {
+      0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+      70%  { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+      100% { box-shadow: none; }
+    }
+    .saved-flash { animation: flashSave 0.6s ease-out; }
+
+    /* Tab pill */
+    .tab-btn { transition: all 0.2s ease; color: #64748b; }
+    .tab-btn.active { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; box-shadow: 0 2px 12px rgba(22,163,74,0.35); }
+    .tab-btn:not(.active):hover { color: #94a3b8; background: #0f172a; }
+
+    /* Live pulse dot */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    .live-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+
+    /* Header gradient */
+    .header-gradient { background: linear-gradient(135deg, #0d1a0f 0%, #0a1628 100%); }
+
+    /* Card hover */
+    .match-card { transition: border-color 0.15s; }
+    .match-card:hover { border-color: #334155; }
+    .match-card.live { border-color: rgba(34,197,94,0.35) !important; background: rgba(34,197,94,0.04); }
   </style>
 </head>
-<body class="min-h-screen bg-gray-900 text-gray-100">
+<body class="min-h-screen">
 
   <!-- Header -->
-  <header class="bg-gray-800 border-b border-green-900/50 sticky top-0 z-20 shadow-lg">
+  <header class="header-gradient border-b border-white/5 sticky top-0 z-20 shadow-xl">
     <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div>
-        <h1 class="text-lg font-black text-green-400">🏸 Supersmash Admin</h1>
-        <p class="text-xs text-gray-400">Score Entry Panel</p>
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-lg shadow-lg shadow-green-900/40">🏸</div>
+        <div>
+          <h1 class="text-base font-bold text-white leading-tight">Supersmash Admin</h1>
+          <p class="text-xs text-slate-500">Score Entry Panel</p>
+        </div>
       </div>
       <button id="publishBtn"
-        class="bg-green-600 hover:bg-green-500 active:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors shadow-lg">
+        class="relative bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 active:scale-95 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-all shadow-lg shadow-green-900/30">
         Publish
       </button>
     </div>
   </header>
 
-  <!-- Publish status -->
+  <!-- Publish status toast -->
   <div id="publishStatus" class="hidden max-w-2xl mx-auto px-4 pt-3">
-    <div id="publishMsg" class="rounded-lg px-4 py-3 text-sm font-medium"></div>
+    <div id="publishMsg" class="rounded-xl px-4 py-3 text-sm font-medium"></div>
   </div>
 
-  <main class="max-w-2xl mx-auto px-4 py-4">
+  <main class="max-w-2xl mx-auto px-4 py-5">
 
-    <!-- Tab navigation -->
-    <div class="flex gap-2 mb-5 bg-gray-800 p-1 rounded-xl">
-      <button class="tab-btn active flex-1 py-2 rounded-lg text-sm font-semibold text-gray-300" data-tab="advanced">Advanced</button>
-      <button class="tab-btn flex-1 py-2 rounded-lg text-sm font-semibold text-gray-300" data-tab="intermediate">Intermediate</button>
-      <button class="tab-btn flex-1 py-2 rounded-lg text-sm font-semibold text-gray-300" data-tab="beginner">Beginner</button>
-      <button class="tab-btn flex-1 py-2 rounded-lg text-sm font-semibold text-gray-300" data-tab="teams">Teams</button>
+    <!-- Tab nav -->
+    <div class="flex gap-1 mb-5 bg-[#0f172a] p-1 rounded-2xl border border-white/5">
+      <button class="tab-btn active flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="advanced">Advanced</button>
+      <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="intermediate">Intermediate</button>
+      <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="beginner">Beginner</button>
+      <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="teams">Teams</button>
     </div>
 
     <!-- Advanced Tab -->
     <div id="tab-advanced" class="tab-content">
-      <h2 class="text-xl font-bold text-green-400 mb-4">Advanced Matches</h2>
       <div id="matches-A"></div>
     </div>
 
     <!-- Intermediate Tab -->
     <div id="tab-intermediate" class="tab-content hidden">
-      <h2 class="text-xl font-bold text-blue-400 mb-4">Intermediate Matches</h2>
       <div id="matches-B"></div>
     </div>
 
     <!-- Beginner Tab -->
     <div id="tab-beginner" class="tab-content hidden">
-      <h2 class="text-xl font-bold text-yellow-400 mb-4">Beginner Matches</h2>
       <div id="matches-C"></div>
     </div>
 
     <!-- Teams Tab -->
     <div id="tab-teams" class="tab-content hidden">
-      <h2 class="text-xl font-bold text-gray-200 mb-4">Cross-Skill Teams</h2>
+      <h2 class="text-lg font-bold text-white mb-4">Cross-Skill Teams</h2>
       <div id="teams-list"></div>
     </div>
 
   </main>
 
   <script>
-    // ─── Data from server ───────────────────────────────────────
     const DATA = {{ data | tojson }};
-    const GROUP_KEYS = { advanced: 'A', intermediate: 'B', beginner: 'C' };
-    const GROUP_LABELS = { A: 'Advanced', B: 'Intermediate', C: 'Beginner' };
-    const PAIR_COLORS = { A: 'green', B: 'blue', C: 'yellow' };
 
-    // ─── Tab switching ──────────────────────────────────────────
+    // ── Tab switching ────────────────────────────────────────────
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -103,13 +130,12 @@
       });
     });
 
-    // ─── Pair name helper ───────────────────────────────────────
     function pairName(pairObj) {
       return pairObj.players[0] + ' & ' + pairObj.players[1];
     }
 
-    // ─── Score save ─────────────────────────────────────────────
-    function saveScore(group, roundIdx, matchIdx, s1, s2, rowEl) {
+    // ── Save score ───────────────────────────────────────────────
+    function saveScore(group, roundIdx, matchIdx, s1, s2, card) {
       fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,15 +143,25 @@
       })
       .then(r => r.json())
       .then(res => {
-        if (res.ok && rowEl) {
-          rowEl.classList.remove('saved-flash');
-          void rowEl.offsetWidth;
-          rowEl.classList.add('saved-flash');
+        if (res.ok && card) {
+          card.classList.remove('saved-flash');
+          void card.offsetWidth;
+          card.classList.add('saved-flash');
+          // Update saved indicator
+          const indicator = card.querySelector('.save-indicator');
+          if (indicator) {
+            indicator.textContent = 'Saved';
+            indicator.classList.remove('text-slate-600');
+            indicator.classList.add('text-green-500');
+            setTimeout(() => {
+              indicator.textContent = '';
+            }, 2000);
+          }
         }
       });
     }
 
-    // ─── Render matches for a group ─────────────────────────────
+    // ── Render matches ───────────────────────────────────────────
     function renderMatches(groupKey, containerId) {
       const gd = DATA.groups[groupKey];
       if (!gd) return;
@@ -134,108 +170,118 @@
       const container = document.getElementById(containerId);
       container.innerHTML = '';
 
+      // Find current round
+      let currentRoundIdx = rounds.length - 1;
+      for (let i = 0; i < rounds.length; i++) {
+        if (rounds[i].some(m => m.score1 === null || m.score2 === null)) {
+          currentRoundIdx = i;
+          break;
+        }
+      }
+
+      const groupColors = { A: '#22c55e', B: '#3b82f6', C: '#eab308' };
+      const accentColor = groupColors[groupKey] || '#22c55e';
+
       rounds.forEach((round, rIdx) => {
-        const allPlayed = round.every(m => m.score1 !== null && m.score2 !== null);
-        const anyUnplayed = round.some(m => m.score1 === null || m.score2 === null);
-        const isCurrent = !allPlayed;
+        const allDone = round.every(m => m.score1 !== null && m.score2 !== null);
+        const isCurrent = rIdx === currentRoundIdx;
 
         const roundDiv = document.createElement('div');
-        roundDiv.className = 'mb-5';
+        roundDiv.className = 'mb-6';
 
-        const headerClass = isCurrent ? 'text-green-300 font-bold' : 'text-gray-500 font-semibold';
-        const currentBadge = isCurrent ? '<span class="ml-2 text-xs bg-green-700 text-white px-2 py-0.5 rounded-full">Current</span>' : '';
-        roundDiv.innerHTML = `<h3 class="${headerClass} text-sm mb-2">Round ${rIdx + 1}${currentBadge}</h3>`;
+        // Round header
+        const headerEl = document.createElement('div');
+        headerEl.className = 'flex items-center gap-2 mb-2';
+        headerEl.innerHTML = `
+          <span class="text-xs font-semibold uppercase tracking-widest ${isCurrent ? 'text-green-400' : 'text-slate-600'}">Round ${rIdx + 1}</span>
+          ${isCurrent ? `<span class="flex items-center gap-1 text-xs text-green-400 font-medium bg-green-950/60 border border-green-900/60 px-2 py-0.5 rounded-full"><span class="live-dot w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>Live</span>` : allDone ? `<span class="text-xs text-slate-600 bg-slate-800/50 px-2 py-0.5 rounded-full">Complete</span>` : ''}
+        `;
+        roundDiv.appendChild(headerEl);
 
         round.forEach((match, mIdx) => {
           const p1 = pairs[match.pair1];
           const p2 = pairs[match.pair2];
           const n1 = pairName(p1);
           const n2 = pairName(p2);
-          const t1 = p1.team ? `<span class="text-xs text-gray-500">(${p1.team})</span>` : '';
-          const t2 = p2.team ? `<span class="text-xs text-gray-500">(${p2.team})</span>` : '';
-
+          const t1 = p1.team || '';
+          const t2 = p2.team || '';
           const isLive = isCurrent && (match.score1 === null || match.score2 === null);
-          const bgClass = isLive ? 'bg-green-900/20 border border-green-800/40' : 'bg-gray-800/60 border border-gray-700/40';
+          const isDone = match.score1 !== null && match.score2 !== null;
 
-          const row = document.createElement('div');
-          row.className = `${bgClass} rounded-xl p-3 mb-2 transition-colors`;
-          row.dataset.group = groupKey;
-          row.dataset.round = rIdx;
-          row.dataset.match = mIdx;
+          const card = document.createElement('div');
+          card.className = `match-card bg-[#0d1625] border border-[#1e293b] rounded-2xl p-3 mb-2 ${isLive ? 'live' : ''}`;
 
-          row.innerHTML = `
-            <div class="flex items-start justify-between gap-2">
+          // Team labels row
+          const teamRow = `
+            <div class="flex items-center justify-between mb-2.5 text-xs text-slate-500 font-medium px-1">
+              <span>${t1 ? `<span class="text-slate-400">${t1}</span>` : ''}</span>
+              <span>${t2 ? `<span class="text-slate-400">${t2}</span>` : ''}</span>
+            </div>`;
+
+          // Scoreboard row
+          const scoreRow = `
+            <div class="flex items-center gap-2">
               <div class="flex-1 min-w-0">
-                <div class="text-sm font-medium text-gray-200 truncate">${n1} ${t1}</div>
-                <div class="text-xs text-gray-500 mt-0.5">vs</div>
-                <div class="text-sm font-medium text-gray-200 truncate">${n2} ${t2}</div>
+                <div class="text-sm font-semibold text-slate-200 leading-tight truncate">${n1}</div>
               </div>
-              <div class="flex flex-col items-center gap-1 shrink-0">
-                <input
-                  type="number" min="0" max="99"
-                  class="score-input"
-                  value="${match.score1 !== null ? match.score1 : ''}"
-                  placeholder="—"
-                  data-side="1"
-                />
-                <input
-                  type="number" min="0" max="99"
-                  class="score-input"
-                  value="${match.score2 !== null ? match.score2 : ''}"
-                  placeholder="—"
-                  data-side="2"
-                />
+              <div class="flex items-center gap-1.5 shrink-0">
+                <input type="number" min="0" max="99" class="score-input" value="${match.score1 !== null ? match.score1 : ''}" placeholder="0" data-side="1" />
+                <span class="text-slate-600 font-bold text-lg">:</span>
+                <input type="number" min="0" max="99" class="score-input" value="${match.score2 !== null ? match.score2 : ''}" placeholder="0" data-side="2" />
+              </div>
+              <div class="flex-1 min-w-0 text-right">
+                <div class="text-sm font-semibold text-slate-200 leading-tight truncate">${n2}</div>
               </div>
             </div>`;
 
-          // Save on blur/change
-          row.querySelectorAll('.score-input').forEach(input => {
+          // Save indicator
+          const indicatorRow = `<div class="flex justify-center mt-1.5"><span class="save-indicator text-xs text-slate-600 h-4"></span></div>`;
+
+          card.innerHTML = (t1 || t2 ? teamRow : '') + scoreRow + indicatorRow;
+
+          // Wire up save
+          card.querySelectorAll('.score-input').forEach(input => {
             const save = () => {
-              const inputs = row.querySelectorAll('.score-input');
-              const v1 = inputs[0].value.trim();
-              const v2 = inputs[1].value.trim();
-              saveScore(groupKey, rIdx, mIdx, v1, v2, row);
+              const inputs = card.querySelectorAll('.score-input');
+              saveScore(groupKey, rIdx, mIdx, inputs[0].value.trim(), inputs[1].value.trim(), card);
             };
             input.addEventListener('blur', save);
             input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); e.target.blur(); } });
           });
 
-          roundDiv.appendChild(row);
+          roundDiv.appendChild(card);
         });
 
         container.appendChild(roundDiv);
       });
     }
 
-    // ─── Render teams ───────────────────────────────────────────
+    // ── Render teams ─────────────────────────────────────────────
     function renderTeams() {
       const container = document.getElementById('teams-list');
       container.innerHTML = '';
       DATA.teams.forEach((team, idx) => {
         const div = document.createElement('div');
-        div.className = 'bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700';
+        div.className = 'bg-[#0d1625] border border-[#1e293b] rounded-2xl p-4 mb-3';
         div.innerHTML = `
-          <div class="flex items-center gap-2 mb-3">
-            <input
-              type="text"
-              class="bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-green-300 font-bold text-base flex-1 focus:outline-none focus:border-green-500"
-              value="${team.name}"
-              data-idx="${idx}"
-            />
-            <button class="save-team-btn bg-green-700 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-colors" data-idx="${idx}">Save</button>
+          <div class="flex items-center gap-2 mb-4">
+            <input type="text"
+              class="bg-[#0a0f1a] border border-[#1e293b] focus:border-green-600 focus:ring-2 focus:ring-green-900/40 rounded-xl px-3 py-2 text-green-300 font-bold text-base flex-1 outline-none transition-all"
+              value="${team.name}" data-idx="${idx}" />
+            <button class="save-team-btn bg-[#0f2318] hover:bg-green-900/60 border border-green-900/50 text-green-400 text-xs px-4 py-2 rounded-xl font-semibold transition-all" data-idx="${idx}">Save</button>
           </div>
-          <div class="space-y-1 text-sm">
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-green-700/40 text-green-300 px-2 py-0.5 rounded w-24 text-center">Advanced</span>
-              <span class="text-gray-300">${team.A[0]} &amp; ${team.A[1]}</span>
+          <div class="space-y-2">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-semibold bg-green-950/70 text-green-400 border border-green-900/40 px-2.5 py-1 rounded-lg w-[90px] text-center">Advanced</span>
+              <span class="text-sm text-slate-300">${team.A[0]} &amp; ${team.A[1]}</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-blue-700/40 text-blue-300 px-2 py-0.5 rounded w-24 text-center">Intermediate</span>
-              <span class="text-gray-300">${team.B[0]} &amp; ${team.B[1]}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-semibold bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2.5 py-1 rounded-lg w-[90px] text-center">Intermediate</span>
+              <span class="text-sm text-slate-300">${team.B[0]} &amp; ${team.B[1]}</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs bg-yellow-700/40 text-yellow-300 px-2 py-0.5 rounded w-24 text-center">Beginner</span>
-              <span class="text-gray-300">${team.C[0]} &amp; ${team.C[1]}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-semibold bg-yellow-950/70 text-yellow-400 border border-yellow-900/40 px-2.5 py-1 rounded-lg w-[90px] text-center">Beginner</span>
+              <span class="text-sm text-slate-300">${team.C[0]} &amp; ${team.C[1]}</span>
             </div>
           </div>`;
         container.appendChild(div);
@@ -251,60 +297,55 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ index: idx, name: newName })
-          })
-          .then(r => r.json())
-          .then(res => {
+          }).then(r => r.json()).then(res => {
             if (res.ok) {
               DATA.teams[idx].name = newName;
-              btn.textContent = 'Saved ✓';
-              btn.classList.add('bg-gray-600');
-              btn.classList.remove('bg-green-700', 'hover:bg-green-600');
+              btn.textContent = '✓ Saved';
+              btn.classList.add('bg-green-900/40', 'text-green-300');
               setTimeout(() => {
                 btn.textContent = 'Save';
-                btn.classList.remove('bg-gray-600');
-                btn.classList.add('bg-green-700', 'hover:bg-green-600');
-              }, 1500);
+                btn.classList.remove('bg-green-900/40', 'text-green-300');
+              }, 2000);
             }
           });
         });
       });
     }
 
-    // ─── Publish button ─────────────────────────────────────────
+    // ── Publish ──────────────────────────────────────────────────
     document.getElementById('publishBtn').addEventListener('click', () => {
       const btn = document.getElementById('publishBtn');
       btn.disabled = true;
       btn.textContent = 'Publishing…';
-
       const statusDiv = document.getElementById('publishStatus');
       const msgDiv = document.getElementById('publishMsg');
       statusDiv.classList.remove('hidden');
-      msgDiv.className = 'rounded-lg px-4 py-3 text-sm font-medium bg-gray-700 text-gray-300';
+      msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-medium bg-slate-800/80 text-slate-400 border border-slate-700';
       msgDiv.textContent = 'Pushing to GitHub Pages…';
 
       fetch('/api/publish', { method: 'POST' })
         .then(r => r.json())
         .then(res => {
           if (res.ok) {
-            msgDiv.className = 'rounded-lg px-4 py-3 text-sm font-medium bg-green-900/50 text-green-300 border border-green-800';
+            msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-semibold bg-green-950/80 text-green-300 border border-green-900';
             msgDiv.textContent = '✓ Published to GitHub Pages';
           } else {
-            msgDiv.className = 'rounded-lg px-4 py-3 text-sm font-medium bg-red-900/50 text-red-300 border border-red-800';
-            msgDiv.textContent = 'Errors: ' + (res.errors || []).join('; ');
+            msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-semibold bg-red-950/80 text-red-300 border border-red-900';
+            msgDiv.textContent = 'Error: ' + (res.errors || []).join('; ');
           }
           btn.disabled = false;
           btn.textContent = 'Publish';
           setTimeout(() => statusDiv.classList.add('hidden'), 5000);
         })
         .catch(err => {
-          msgDiv.className = 'rounded-lg px-4 py-3 text-sm font-medium bg-red-900/50 text-red-300 border border-red-800';
+          msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-semibold bg-red-950/80 text-red-300 border border-red-900';
           msgDiv.textContent = 'Network error: ' + err.message;
           btn.disabled = false;
           btn.textContent = 'Publish';
         });
     });
 
-    // ─── Init ───────────────────────────────────────────────────
+    // ── Init ─────────────────────────────────────────────────────
     renderMatches('A', 'matches-A');
     renderMatches('B', 'matches-B');
     renderMatches('C', 'matches-C');
