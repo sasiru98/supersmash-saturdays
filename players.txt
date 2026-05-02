@@ -1,36 +1,41 @@
-# Sample players for Supersmash Saturdays
-# Format: Name : Skill Rating
-# Ratings: A+, A, A-, B+, B, B-, C+, C, C-
+# Advanced
+Tharindu : A+
+Roshen : A+
+Sachintha : A+
+Aditya : A+
+Gautam : A
+Nishant : A
+Stevi : A
+Reyrey : A-
+Som : A-
+SP : A-
+Stephen : A-
+Helder : A-
 
-Marcus Chen : A+
-Priya Sharma : A+
-James Okafor : A
-Yuki Tanaka : A
-Sofia Reyes : A
-Daniel Park : A-
-Aisha Mwangi : A-
-Liam Novak : A-
-Zara Ahmed : A-
-Ryan Kowalski : A-
+# Intermediate
+Rodney : B+
+Prasad : B+
+Yoko : B+
+Bhav : B+
+Aunch : B+
+Vishal N : B
+Dhruv : B
+Anant : B
+Sidhaika : B
+Daniel : B
+Dhiv : B
+GC : B
 
-Noah Patel : B+
-Emma Johansson : B+
-Carlos Diaz : B+
-Mei Lin : B
-Trevor Wilson : B
-Fatima Hassan : B
-Ben Nakamura : B
-Ava Christensen : B-
-Louis Bernard : B-
-Isabelle Dubois : B-
-
-Grace Osei : C+
-Kevin Tran : C+
-Olivia Murphy : C+
-Sam Fletcher : C
-Jade Morrison : C
-Raj Kapoor : C
-Amara Diallo : C
-Tom Hughes : C-
-Leila Nkosi : C-
-Chris Yamamoto : C-
+# Beginner
+Hari : B
+Nancy : B-
+Inson : B-
+Malhar : B-
+Vicky : B-
+Pav : B-
+Akhilesh : C+
+Abhi : C+
+Nik : C+
+Vibhu : C
+Cindy : C-
+Khin : C-

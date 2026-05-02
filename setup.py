@@ -12,36 +12,78 @@ GROUP_NAMES = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
 DATA_FILE = "tournament.json"
 
 
-def rating_to_group(rating):
-    return rating[0]
+
+def strip_invisible(s):
+    """Strip zero-width and other invisible Unicode characters."""
+    invisible = {'​', '‌', '‍', '⁠', '﻿', ' ', ' ', ' '}
+    return ''.join(c for c in s if c not in invisible).strip()
 
 
 def parse_players(filepath="players.txt"):
     players = []
-    with open(filepath, "r") as f:
-        for line in f:
-            line = line.strip()
+    skipped = []
+    try:
+        f = open(filepath, "r", encoding="utf-8")
+    except UnicodeDecodeError:
+        f = open(filepath, "r", encoding="utf-8-sig")
+
+    with f:
+        for lineno, raw in enumerate(f, 1):
+            line = strip_invisible(raw)
             if not line or line.startswith("#"):
                 continue
             parts = line.split(":")
-            if len(parts) != 2:
-                print(f"  Skipping malformed line: {line}")
+            if len(parts) < 2:
+                print(f"  [line {lineno}] SKIP — no colon separator: {repr(raw.rstrip())}")
+                skipped.append(lineno)
                 continue
-            name = parts[0].strip()
-            rating = parts[1].strip()
+            if len(parts) > 2:
+                # Allow names with colons by only splitting on the last colon
+                name = strip_invisible(":".join(parts[:-1]))
+                rating = strip_invisible(parts[-1])
+            else:
+                name = strip_invisible(parts[0])
+                rating = strip_invisible(parts[1])
+
+            if not name:
+                print(f"  [line {lineno}] SKIP — empty name after stripping: {repr(raw.rstrip())}")
+                skipped.append(lineno)
+                continue
             if rating not in SKILL_ORDER:
-                print(f"  Unknown rating '{rating}' for {name}, skipping.")
+                print(f"  [line {lineno}] SKIP — unknown rating '{rating}' for '{name}' (expected one of {', '.join(SKILL_ORDER)})")
+                skipped.append(lineno)
                 continue
-            players.append({"name": name, "rating": rating, "group": rating_to_group(rating)})
+            players.append({"name": name, "rating": rating})
+            print(f"  [line {lineno}] OK   — {name} ({rating})")
+
+    if skipped:
+        print(f"\n  WARNING: {len(skipped)} line(s) skipped (lines {skipped})")
+    print(f"\n  Loaded {len(players)} valid players.")
     return players
 
 
-def sort_players(players):
-    groups = {"A": [], "B": [], "C": []}
-    for p in players:
-        groups[p["group"]].append(p)
-    for g in groups:
-        groups[g].sort(key=lambda x: SKILL_ORDER.index(x["rating"]))
+def assign_groups(players):
+    """Sort all players by skill rating, then split evenly into Advanced/Intermediate/Beginner."""
+    sorted_all = sorted(players, key=lambda x: SKILL_ORDER.index(x["rating"]))
+    n = len(sorted_all)
+    size = n // 3
+    remainder = n % 3
+
+    if remainder != 0:
+        print(f"\n  NOTE: {n} players can't split evenly into 3 groups.")
+        print(f"  The bottom {remainder} player(s) will be dropped for balance:")
+        for p in sorted_all[n - remainder:]:
+            print(f"    - {p['name']} ({p['rating']})")
+        sorted_all = sorted_all[:n - remainder]
+        size = len(sorted_all) // 3
+        print(f"  Proceeding with {len(sorted_all)} players ({size} per group).")
+
+    groups = {
+        "A": sorted_all[:size],
+        "B": sorted_all[size:size * 2],
+        "C": sorted_all[size * 2:],
+    }
+    print(f"\n  Group sizes: Advanced={len(groups['A'])}, Intermediate={len(groups['B'])}, Beginner={len(groups['C'])}")
     return groups
 
 
@@ -60,26 +102,27 @@ def edit_groups(groups):
             break
         elif choice == "m":
             name = input("  Player name to move: ").strip()
-            new_rating = input("  New rating (A+/A/A-/B+/B/B-/C+/C/C-): ").strip()
-            if new_rating not in SKILL_ORDER:
-                print("  Invalid rating.")
+            dest = input("  Move to group (A=Advanced, B=Intermediate, C=Beginner): ").strip().upper()
+            if dest not in groups:
+                print("  Invalid group. Enter A, B, or C.")
                 continue
             found = False
             for g in groups:
                 for p in groups[g]:
                     if p["name"].lower() == name.lower():
+                        if g == dest:
+                            print(f"  {name} is already in that group.")
+                            found = True
+                            break
                         groups[g].remove(p)
-                        p["rating"] = new_rating
-                        p["group"] = rating_to_group(new_rating)
-                        new_g = p["group"]
-                        groups[new_g].append(p)
-                        groups[new_g].sort(key=lambda x: SKILL_ORDER.index(x["rating"]))
+                        groups[dest].append(p)
+                        print(f"  Moved {name} from {GROUP_NAMES[g]} to {GROUP_NAMES[dest]}.")
                         found = True
                         break
                 if found:
                     break
             if not found:
-                print("  Player not found.")
+                print(f"  Player '{name}' not found.")
             else:
                 display_groups(groups)
         elif choice == "r":
@@ -99,6 +142,18 @@ def edit_groups(groups):
                 display_groups(groups)
         else:
             print("  Unknown option.")
+
+
+def write_players_txt(groups, filepath="players.txt"):
+    lines = []
+    for g, label in GROUP_NAMES.items():
+        lines.append(f"# {label}")
+        for p in groups[g]:
+            lines.append(f"{p['name']} : {p['rating']}")
+        lines.append("")
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines).rstrip() + "\n")
+    print(f"  Updated {filepath} with confirmed groups.")
 
 
 def make_pairs(group_players):
@@ -295,12 +350,13 @@ def main():
 
     players = parse_players("players.txt")
     print(f"\n  Loaded {len(players)} players from players.txt")
-    groups = sort_players(players)
+    groups = assign_groups(players)
 
     print("\n--- SKILL GROUPS ---")
     display_groups(groups)
     print("\nReview the skill groups above.")
     edit_groups(groups)
+    write_players_txt(groups)
 
     # Step 2: Generate pairs
     all_pairs = {}

@@ -134,6 +134,15 @@ def api_publish():
 
 if __name__ == "__main__":
     import socket
+    from validate import validate_and_sync
+
+    print("\n  Validating players.txt...")
+    ok, msg = validate_and_sync()
+    print(msg)
+    if not ok:
+        print("\n  Fix the errors above, then restart.\n")
+        raise SystemExit(1)
+
     hostname = socket.gethostname()
     try:
         local_ip = socket.gethostbyname(hostname)
