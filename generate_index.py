@@ -73,7 +73,7 @@ def pair_display(pair_obj):
     return f"{players[0]} & {players[1]}", team
 
 
-def standings_table(standings, group_data, accent):
+def standings_table(standings, group_data, accent, team_rank_map=None):
     rows = ""
     accent_styles = {
         "green": ("text-green-400", "text-green-300", "bg-green-950/60 text-green-300"),
@@ -90,7 +90,8 @@ def standings_table(standings, group_data, accent):
         diff_color = "text-green-400" if diff > 0 else ("text-red-400" if diff < 0 else "text-slate-500")
         medal = RANK_MEDALS.get(s["rank"], "")
         rank_cell = f'<span class="text-base">{medal}</span>' if medal else f'<span class="text-slate-500 font-semibold text-sm">{s["rank"]}</span>'
-        team_badge = f'<span class="text-xs {a_badge} px-1.5 py-0.5 rounded-md font-medium ml-1">{team}</span>' if team else ""
+        team_medal = TEAM_MEDALS.get((team_rank_map or {}).get(team), "")
+        team_badge = f'<span class="text-xs {a_badge} px-1.5 py-0.5 rounded-md font-medium ml-1">{team_medal} {team}</span>' if team else ""
 
         row_bg = "bg-white/[0.02]" if s["rank"] % 2 == 0 else ""
         rows += f"""
@@ -213,13 +214,64 @@ def rounds_section(group_data, current_round_idx, accent):
     return html
 
 
-def teams_grid(teams):
+def calc_team_standings(teams, groups_data):
+    """Rank teams by combined wins (primary) then combined point diff (tiebreaker)."""
+    team_stats = []
+    for t in teams:
+        total_wins = 0
+        total_diff = 0
+        for g in ["A", "B", "C"]:
+            pair_names = set(t[g])
+            gd = groups_data[g]
+            for rnd in gd["rounds"]:
+                for match in rnd:
+                    s1, s2 = match.get("score1"), match.get("score2")
+                    if s1 is None or s2 is None:
+                        continue
+                    p1_names = set(gd["pairs"][match["pair1"]]["players"])
+                    p2_names = set(gd["pairs"][match["pair2"]]["players"])
+                    if p1_names == pair_names:
+                        total_wins += 1 if s1 > s2 else 0
+                        total_diff += s1 - s2
+                    elif p2_names == pair_names:
+                        total_wins += 1 if s2 > s1 else 0
+                        total_diff += s2 - s1
+        team_stats.append({"team": t, "wins": total_wins, "diff": total_diff})
+
+    team_stats.sort(key=lambda x: (-x["wins"], -x["diff"]))
+    return team_stats
+
+
+TEAM_MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
+
+
+def teams_grid(teams, groups_data):
+    ranked = calc_team_standings(teams, groups_data)
+    # Build rank lookup by team name
+    rank_map = {s["team"]["name"]: i + 1 for i, s in enumerate(ranked)}
+
     cards = ""
     for t in teams:
         a, b, c = t["A"], t["B"], t["C"]
+        rank = rank_map.get(t["name"], 0)
+        medal = TEAM_MEDALS.get(rank, "")
+        medal_html = f'<span class="text-xl mr-1">{medal}</span>' if medal else f'<span class="text-xs text-slate-600 font-semibold mr-1">#{rank}</span>'
+        stats = next(s for s in ranked if s["team"]["name"] == t["name"])
+        diff = stats["diff"]
+        diff_str = f"+{diff}" if diff > 0 else str(diff)
+        diff_color = "text-green-400" if diff > 0 else ("text-red-400" if diff < 0 else "text-slate-500")
         cards += f"""
         <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
-          <div class="text-base font-bold text-white mb-3">{t['name']}</div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              {medal_html}
+              <span class="text-base font-bold text-white">{t['name']}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-500">{stats['wins']}W</span>
+              <span class="text-xs {diff_color} ml-2 font-semibold">{diff_str}</span>
+            </div>
+          </div>
           <div class="space-y-2">
             <div class="flex items-center gap-2">
               <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">☀️ Sun</span>
@@ -238,12 +290,12 @@ def teams_grid(teams):
     return cards
 
 
-def group_section(g, gd, accent):
+def group_section(g, gd, accent, team_rank_map=None):
     public_name = GROUP_PUBLIC[g]
     emoji       = GROUP_EMOJI[g]
     standings = calc_standings(gd)
     current_round = find_current_round(gd["rounds"])
-    st_rows = standings_table(standings, gd, accent)
+    st_rows = standings_table(standings, gd, accent, team_rank_map)
     grid = match_grid(gd, standings, accent)
     rounds_html = rounds_section(gd, current_round, accent)
 
@@ -309,12 +361,15 @@ def generate_index():
     data = load_data()
     teams = data.get("teams", [])
 
-    t_cards = teams_grid(teams)
+    t_cards = teams_grid(teams, data["groups"])
+    ranked_teams = calc_team_standings(teams, data["groups"])
+    team_rank_map = {s["team"]["name"]: i + 1 for i, s in enumerate(ranked_teams)}
+
     group_sections = ""
     for g in GROUP_ORDER:
         if g not in data["groups"]:
             continue
-        group_sections += group_section(g, data["groups"][g], GROUP_ACCENT[g])
+        group_sections += group_section(g, data["groups"][g], GROUP_ACCENT[g], team_rank_map)
 
     html = f"""<!DOCTYPE html>
 <html lang="en" class="dark">
