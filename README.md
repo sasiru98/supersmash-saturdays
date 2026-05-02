@@ -1,14 +1,24 @@
 # 🏸 Supersmash Saturdays
 
-Round-robin tournament manager for Supersmash Saturdays badminton events.
-Players are grouped by skill (Advanced / Intermediate / Beginner) and paired within their group.
-Cross-skill teams link one pair from each group for social and mentorship purposes.
+Round-robin tournament manager for Supersmash Saturdays badminton events. Players are split into three equal skill groups and paired within their group. Cross-skill teams link one pair from each group for social and mentorship purposes.
 
-**Repo:** https://github.com/sasiru98/supersmash-saturdays  
+**Repo:** https://github.com/sasiru98/supersmash-saturdays
 **Live standings:** https://sasiru98.github.io/supersmash-saturdays
 
 > QR code for players → `https://sasiru98.github.io/supersmash-saturdays`
-> _(Generate a QR code at qr.io or similar and print it for the venue)_
+> *(Generate a QR code at qr.io or similar and print it for the venue)*
+
+---
+
+## How it works
+
+- Players are sorted by skill rating and split evenly into three equal groups
+- Public-facing group names are **☀️ Sun / 🌙 Moon / ⭐ Stars** — no skill labels shown to players
+- Admin panel uses **Advanced / Intermediate / Beginner** internally
+- Pairs are formed top-to-bottom within each group (1st with last, 2nd with second-last, etc.)
+- Each group runs its own full round-robin (every pair plays every other pair once)
+- Cross-skill teams assign one pair from each group together — for social mixing and mentorship
+- Standings recalculated from raw scores every time you publish (wins → point diff → points scored)
 
 ---
 
@@ -26,6 +36,8 @@ Each line: `Name : Skill Rating`
 
 Ratings: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C+`, `C`, `C-`
 
+Order and grouping don't matter — setup sorts and splits automatically:
+
 ```
 Marcus Chen : A+
 Emma Johansson : B+
@@ -38,63 +50,112 @@ Kevin Tran : C+
 python setup.py
 ```
 
-The setup script will:
-- Sort players into skill groups (Advanced/Intermediate/Beginner)
-- Prompt you to review and adjust groupings
-- Generate pairs using top-to-bottom pairing (1st with last, etc.)
-- Assign cross-skill teams (one pair per skill group)
-- Let you name the teams
+The setup pipeline will:
+- Load and validate all players
+- Sort by skill rating and split into three equal groups
+- Show the groups — confirm or move players between groups
+- Generate pairs using top-to-bottom pairing
+- Assign cross-skill teams (one pair per group), optionally name them
 - Generate the full round-robin schedule
-- Create `tournament.json` and the initial `index.html`
-- Optionally push to GitHub Pages
+- Write `tournament.json` and `index.html`
+- Rewrite `players.txt` with confirmed group sections (for future edits)
 
-### 4. Start the admin server
+### 4. (Optional) Move players between groups
+
+After setup, `players.txt` is organised into sections:
+
+```
+# Advanced
+Tharindu : A+
+...
+
+# Intermediate
+Rodney : B+
+...
+
+# Beginner
+Hari : B
+...
+```
+
+To move a player, cut their line and paste it under a different section header. When you run `python app.py` next, the validator will detect the change, show you the diff, and ask if you want to regenerate pairings.
+
+> ⚠️ Regenerating resets all entered scores.
+
+### 5. Start the admin server
 
 ```bash
 python app.py
 ```
 
-The admin panel runs on your local network (port 5000). Open it on your tablet:
+On startup it validates `players.txt` against `tournament.json` and reports any issues before the server starts. The admin panel runs on your local network (port 5000):
 
 ```
 http://<your-ip>:5000
 ```
 
-The server will print the address on startup.
+The server prints the address on startup.
 
 ---
 
 ## During the Tournament
 
-- **Admin tablet** → `http://<local-ip>:5000`  
-  Enter scores as matches finish. All scores are auto-saved on blur/Enter.
+- **Admin tablet** → `http://<local-ip>:5000`
+  Enter scores as matches finish. Scores auto-save on blur or Enter.
 
-- **Player phones** → https://sasiru98.github.io/supersmash-saturdays  
-  Live standings, results grid, and schedule.
+- **Player phones** → https://sasiru98.github.io/supersmash-saturdays
+  Live standings, results grid, and schedule. Groups shown as ☀️ Sun / 🌙 Moon / ⭐ Stars.
 
 - **Publish button** → Recalculates all standings, commits to `dev`, merges to `main`, pushes to GitHub Pages.
 
-- **Team names** → Editable at any time in the Teams tab of the admin panel.
+- **Team names** → Editable anytime in the Teams tab of the admin panel.
 
 ---
 
-## Git Workflow
+## Validation errors
 
-- Development and score updates are committed to `dev`
+If `players.txt` has issues, `app.py` will refuse to start and show exactly what's wrong:
+
+| Error | Fix |
+|---|---|
+| No colon separator | Format must be `Name : Rating` |
+| Unknown rating | Use one of: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C+`, `C`, `C-` |
+| Missing section header | Add `# Advanced`, `# Intermediate`, `# Beginner` |
+| Duplicate name | Each player must appear exactly once |
+| Groups changed | Choose to regenerate (resets scores) or rerun `setup.py` |
+
+---
+
+## Git workflow
+
+- All development and score updates committed to `dev`
 - On every publish, `dev` is merged into `main` and both are pushed
-- `main` is always the clean public-facing branch (GitHub Pages)
+- `main` is always the clean public-facing branch (GitHub Pages serves from here)
 
 ---
 
-## Project Structure
+## When does tournament.json update?
+
+| Action | Effect |
+|---|---|
+| `python setup.py` | Full rebuild — pairings, schedule, teams *(resets scores)* |
+| `python app.py` when groups differ | Pairings and schedule regenerated *(resets scores)* |
+| Entering a score in admin | That match only |
+| Saving a team name in admin | Team name only |
+| Publish | Derives `index.html` from scores — does not change `tournament.json` |
+
+---
+
+## Project structure
 
 ```
-players.txt          # Player list with skill ratings
+players.txt          # Player list with skill ratings (editable after setup)
 setup.py             # One-time tournament setup pipeline
+validate.py          # Validates players.txt and syncs tournament.json on startup
 generate_index.py    # Generates public index.html from tournament.json
-app.py               # Flask admin server
+app.py               # Flask admin server (local only)
 templates/
   admin.html         # Admin score entry panel
 index.html           # Public standings page (GitHub Pages)
-tournament.json      # All raw tournament state (gitignored)
+tournament.json      # Raw tournament state — gitignored, local only
 ```

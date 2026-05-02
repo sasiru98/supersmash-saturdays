@@ -8,7 +8,9 @@ DATA_FILE = "tournament.json"
 OUTPUT_FILE = "index.html"
 
 GROUP_ORDER = ["A", "B", "C"]
-GROUP_LABELS = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
+GROUP_LABELS = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}  # internal/admin
+GROUP_PUBLIC = {"A": "Sun", "B": "Moon", "C": "Stars"}                  # public-facing
+GROUP_EMOJI  = {"A": "☀️",  "B": "🌙",   "C": "⭐"}
 GROUP_ACCENT = {"A": "green", "B": "blue", "C": "amber"}
 
 RANK_MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
@@ -220,15 +222,15 @@ def teams_grid(teams):
           <div class="text-base font-bold text-white mb-3">{t['name']}</div>
           <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Advanced</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">☀️ Sun</span>
               <span class="text-xs text-slate-300">{a[0]} &amp; {a[1]}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Intermed.</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">🌙 Moon</span>
               <span class="text-xs text-slate-300">{b[0]} &amp; {b[1]}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">Beginner</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">⭐ Stars</span>
               <span class="text-xs text-slate-300">{c[0]} &amp; {c[1]}</span>
             </div>
           </div>
@@ -237,7 +239,8 @@ def teams_grid(teams):
 
 
 def group_section(g, gd, accent):
-    label = GROUP_LABELS[g]
+    public_name = GROUP_PUBLIC[g]
+    emoji       = GROUP_EMOJI[g]
     standings = calc_standings(gd)
     current_round = find_current_round(gd["rounds"])
     st_rows = standings_table(standings, gd, accent)
@@ -256,7 +259,7 @@ def group_section(g, gd, accent):
         <!-- Section header -->
         <div class="flex items-center gap-3 mb-4">
           <div class="h-px flex-1 bg-gradient-to-r {grad}"></div>
-          <h2 class="text-sm font-bold uppercase tracking-[0.15em] {a_text}">{label}</h2>
+          <h2 class="text-sm font-bold uppercase tracking-[0.15em] {a_text}">{emoji} {public_name}</h2>
           <div class="h-px flex-1 bg-gradient-to-l {grad}"></div>
         </div>
 
