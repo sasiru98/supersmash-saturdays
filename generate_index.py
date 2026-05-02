@@ -244,13 +244,35 @@ def calc_team_standings(teams, groups_data):
 TEAM_MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
 
 
+def pair_rank_lookup(groups_data):
+    """Build a dict: frozenset(player_names) -> rank within their group."""
+    lookup = {}
+    for g in ["A", "B", "C"]:
+        standings = calc_standings(groups_data[g])
+        for s in standings:
+            key = frozenset(s["pair"]["players"])
+            lookup[key] = s["rank"]
+    return lookup
+
+
 def teams_grid(teams, groups_data):
     ranked = calc_team_standings(teams, groups_data)
+    medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+    p_ranks = pair_rank_lookup(groups_data)
+
+    def pair_row(group_label, group_style, players):
+        key = frozenset(players)
+        rank = p_ranks.get(key)
+        medal = f'<span class="ml-1">{medals[rank]}</span>' if rank in medals else ""
+        return f"""
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold uppercase tracking-wider {group_style} px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">{group_label}</span>
+              <span class="text-xs text-slate-300">{players[0]} &amp; {players[1]}{medal}</span>
+            </div>"""
 
     cards = ""
     for i, s in enumerate(ranked):
         t = s["team"]
-        a, b, c = t["A"], t["B"], t["C"]
         rank = i + 1
         diff = s["diff"]
         diff_str = f"+{diff}" if diff > 0 else str(diff)
@@ -268,18 +290,9 @@ def teams_grid(teams, groups_data):
             </div>
           </div>
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wider bg-green-950/70 text-green-400 border border-green-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">☀️ Sun</span>
-              <span class="text-xs text-slate-300">{a[0]} &amp; {a[1]}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wider bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">🌙 Moon</span>
-              <span class="text-xs text-slate-300">{b[0]} &amp; {b[1]}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wider bg-amber-950/70 text-amber-400 border border-amber-900/40 px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">⭐ Stars</span>
-              <span class="text-xs text-slate-300">{c[0]} &amp; {c[1]}</span>
-            </div>
+            {pair_row("☀️ Sun",  "bg-green-950/70 text-green-400 border border-green-900/40", t["A"])}
+            {pair_row("🌙 Moon", "bg-blue-950/70 text-blue-400 border border-blue-900/40",   t["B"])}
+            {pair_row("⭐ Stars","bg-amber-950/70 text-amber-400 border border-amber-900/40", t["C"])}
           </div>
         </div>"""
     return cards
