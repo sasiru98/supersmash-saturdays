@@ -73,7 +73,7 @@ def pair_display(pair_obj):
     return f"{players[0]} & {players[1]}", team
 
 
-def standings_table(standings, group_data, accent, team_rank_map=None):
+def standings_table(standings, group_data, accent):
     rows = ""
     accent_styles = {
         "green": ("text-green-400", "text-green-300", "bg-green-950/60 text-green-300"),
@@ -90,8 +90,7 @@ def standings_table(standings, group_data, accent, team_rank_map=None):
         diff_color = "text-green-400" if diff > 0 else ("text-red-400" if diff < 0 else "text-slate-500")
         medal = RANK_MEDALS.get(s["rank"], "")
         rank_cell = f'<span class="text-base">{medal}</span>' if medal else f'<span class="text-slate-500 font-semibold text-sm">{s["rank"]}</span>'
-        team_medal = TEAM_MEDALS.get((team_rank_map or {}).get(team), "")
-        team_badge = f'<span class="text-xs {a_badge} px-1.5 py-0.5 rounded-md font-medium ml-1">{team_medal} {team}</span>' if team else ""
+        team_badge = f'<span class="text-xs {a_badge} px-1.5 py-0.5 rounded-md font-medium ml-1">{team}</span>' if team else ""
 
         row_bg = "bg-white/[0.02]" if s["rank"] % 2 == 0 else ""
         rows += f"""
@@ -247,28 +246,24 @@ TEAM_MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
 
 def teams_grid(teams, groups_data):
     ranked = calc_team_standings(teams, groups_data)
-    # Build rank lookup by team name
-    rank_map = {s["team"]["name"]: i + 1 for i, s in enumerate(ranked)}
 
     cards = ""
-    for t in teams:
+    for i, s in enumerate(ranked):
+        t = s["team"]
         a, b, c = t["A"], t["B"], t["C"]
-        rank = rank_map.get(t["name"], 0)
-        medal = TEAM_MEDALS.get(rank, "")
-        medal_html = f'<span class="text-xl mr-1">{medal}</span>' if medal else f'<span class="text-xs text-slate-600 font-semibold mr-1">#{rank}</span>'
-        stats = next(s for s in ranked if s["team"]["name"] == t["name"])
-        diff = stats["diff"]
+        rank = i + 1
+        diff = s["diff"]
         diff_str = f"+{diff}" if diff > 0 else str(diff)
         diff_color = "text-green-400" if diff > 0 else ("text-red-400" if diff < 0 else "text-slate-500")
         cards += f"""
         <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
           <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center">
-              {medal_html}
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-600 w-5">#{rank}</span>
               <span class="text-base font-bold text-white">{t['name']}</span>
             </div>
             <div class="text-right">
-              <span class="text-xs text-slate-500">{stats['wins']}W</span>
+              <span class="text-xs text-slate-500">{s['wins']}W</span>
               <span class="text-xs {diff_color} ml-2 font-semibold">{diff_str}</span>
             </div>
           </div>
@@ -290,12 +285,12 @@ def teams_grid(teams, groups_data):
     return cards
 
 
-def group_section(g, gd, accent, team_rank_map=None):
+def group_section(g, gd, accent):
     public_name = GROUP_PUBLIC[g]
     emoji       = GROUP_EMOJI[g]
     standings = calc_standings(gd)
     current_round = find_current_round(gd["rounds"])
-    st_rows = standings_table(standings, gd, accent, team_rank_map)
+    st_rows = standings_table(standings, gd, accent)
     grid = match_grid(gd, standings, accent)
     rounds_html = rounds_section(gd, current_round, accent)
 
@@ -362,14 +357,12 @@ def generate_index():
     teams = data.get("teams", [])
 
     t_cards = teams_grid(teams, data["groups"])
-    ranked_teams = calc_team_standings(teams, data["groups"])
-    team_rank_map = {s["team"]["name"]: i + 1 for i, s in enumerate(ranked_teams)}
 
     group_sections = ""
     for g in GROUP_ORDER:
         if g not in data["groups"]:
             continue
-        group_sections += group_section(g, data["groups"][g], GROUP_ACCENT[g], team_rank_map)
+        group_sections += group_section(g, data["groups"][g], GROUP_ACCENT[g])
 
     html = f"""<!DOCTYPE html>
 <html lang="en" class="dark">

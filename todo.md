@@ -112,3 +112,40 @@ supersmash-saturdays/
 - `app.py` template folder path will need updating (`template_folder='../templates'`)
 - `README.md` run commands will need updating (`python core/setup.py`, `python core/app.py`)
 - Test the full flow (setup → validate → serve → publish) after moving
+
+
+## 5. Tabs on Public index.html
+
+Replace the single scrolling page with a tabbed layout matching the admin panel.
+
+### Proposed tabs
+- **Teams** — cross-skill teams grid with medals and rankings (current default view)
+- **☀️ Sun** — standings, results grid, schedule for Advanced group
+- **🌙 Moon** — standings, results grid, schedule for Intermediate group
+- **⭐ Stars** — standings, results grid, schedule for Beginner group
+- **Stats** — player and group stats (once task 1 is built)
+
+### Implementation notes
+- Tabs implemented in vanilla JS — no frameworks, keeps index.html fully static
+- Active tab persisted in URL hash (e.g. `#moon`) so sharing a link lands on the right tab
+- Default tab on load: Teams
+- Tab bar should be sticky so it's always accessible while scrolling
+
+
+## 6. Pair Performance Colours on Teams Page
+
+On the cross-skill teams grid, show how each pair ranked within their division using a colour spectrum — no medals, just a visual heat hint.
+
+### Behaviour
+- Teams sorted by their overall ranking (existing logic)
+- Within each team card, each pair row gets a left border or background tint based on their rank within their group
+- Colour spectrum across all pairs in that group: **green (1st) → yellow (mid) → red (last)**
+- Spectrum scales dynamically to however many pairs are in the group (e.g. 6 pairs = 6 steps)
+- No medals, no numbers — colour only, so it reads at a glance without feeling like a ranking
+
+### Implementation notes
+- Rank data already available from `calc_standings()` per group
+- Pass rank and total pairs count into `teams_grid()` to calculate colour position
+- Use HSL interpolation for smooth spectrum: `hsl(120, ...)` green → `hsl(0, ...)` red
+- Subtle application — border-left or a soft background tint, not a bold fill
+- Should still look clean when no matches have been played (neutral/grey fallback)
