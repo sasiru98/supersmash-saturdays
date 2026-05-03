@@ -449,6 +449,24 @@ def generate_index():
         if os.path.exists(os.path.join(_REPO_ROOT, "archive.html")) else ""
     )
 
+    if all_complete:
+        hero_label = '<span class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">Final Results</span>'
+        complete_banner = (
+            '<!-- Tournament complete banner -->'
+            '<div class="bg-amber-950/40 border-b border-amber-900/50">'
+            '<div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-center gap-3">'
+            '<span class="text-lg">🏆</span>'
+            '<span class="text-sm font-bold text-amber-300 uppercase tracking-[0.15em]">Tournament Complete</span>'
+            '<span class="text-lg">🏆</span></div></div>'
+        )
+        progress_label = "Final"
+        bar_color = "bg-amber-500"
+    else:
+        hero_label = '<span class="text-xs font-semibold uppercase tracking-[0.2em] text-green-500">Live Tournament</span>'
+        complete_banner = ""
+        progress_label = "Progress"
+        bar_color = "bg-green-500"
+
     html = f"""<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -477,7 +495,7 @@ def generate_index():
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="text-2xl">🏸</span>
-            {"<span class=\"text-xs font-semibold uppercase tracking-[0.2em] text-amber-400\">Final Results</span>" if all_complete else "<span class=\"text-xs font-semibold uppercase tracking-[0.2em] text-green-500\">Live Tournament</span>"}</div>
+            {hero_label}</div>
           <h1 class="text-3xl font-black text-white tracking-tight leading-none">Supersmash<br/><span class="text-green-400">Saturdays</span></h1>
         </div>
         <div class="text-right mt-1">
@@ -488,7 +506,7 @@ def generate_index():
     </div>
   </header>
 
-  {"<!-- Tournament complete banner --><div class=\"bg-amber-950/40 border-b border-amber-900/50\"><div class=\"max-w-2xl mx-auto px-4 py-3 flex items-center justify-center gap-3\"><span class=\"text-lg\">🏆</span><span class=\"text-sm font-bold text-amber-300 uppercase tracking-[0.15em]\">Tournament Complete</span><span class=\"text-lg\">🏆</span></div></div>" if all_complete else ""}
+  {complete_banner}
 
   <!-- Sticky tab bar -->
   <nav class="sticky top-0 z-10 bg-[#080d14]/95 backdrop-blur-sm border-b border-white/5">
@@ -502,11 +520,11 @@ def generate_index():
   <!-- Match progress bar -->
   <div class="max-w-2xl mx-auto px-4 pt-4 pb-1">
     <div class="flex items-center justify-between mb-1.5">
-      <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{"Final" if all_complete else "Progress"}</span>
+      <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{progress_label}</span>
       <span class="text-[10px] font-semibold text-slate-500">{played_matches} / {total_matches} matches</span>
     </div>
     <div class="h-1 rounded-full bg-white/5 overflow-hidden">
-      <div class="h-full rounded-full {"bg-amber-500" if all_complete else "bg-green-500"} transition-all" style="width:{pct}%"></div>
+      <div class="h-full rounded-full {bar_color} transition-all" style="width:{pct}%"></div>
     </div>
   </div>
 
