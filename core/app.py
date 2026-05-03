@@ -9,8 +9,9 @@ from flask import Flask, jsonify, render_template, request
 
 from generate_index import generate_index
 
-DATA_FILE = "tournament.json"
-app = Flask(__name__)
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_FILE  = os.path.join(_REPO_ROOT, "tournament.json")
+app = Flask(__name__, template_folder=os.path.join(_REPO_ROOT, "templates"))
 
 
 def load_data():
@@ -31,7 +32,7 @@ def git_publish():
     errors = []
 
     def run(cmd):
-        r = subprocess.run(cmd, capture_output=True, text=True, cwd=".")
+        r = subprocess.run(cmd, capture_output=True, text=True, cwd=_REPO_ROOT)
         if r.returncode != 0:
             errors.append(f"{' '.join(cmd)}: {r.stderr.strip()}")
         return r.returncode == 0

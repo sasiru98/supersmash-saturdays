@@ -4,11 +4,12 @@
 import json
 import os
 
+_REPO_ROOT   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILL_ORDER   = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"]
 GROUP_NAMES   = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
 VALID_GENDERS = {"M", "F"}
-DATA_FILE    = "tournament.json"
-PLAYERS_FILE = "players.txt"
+DATA_FILE    = os.path.join(_REPO_ROOT, "tournament.json")
+PLAYERS_FILE = os.path.join(_REPO_ROOT, "players.txt")
 
 # Zero-width and invisible Unicode characters (by code point — no copy-paste ambiguity)
 INVISIBLE = {

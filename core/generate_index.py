@@ -4,8 +4,9 @@
 import json
 import os
 
-DATA_FILE = "tournament.json"
-OUTPUT_FILE = "index.html"
+_REPO_ROOT  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_FILE   = os.path.join(_REPO_ROOT, "tournament.json")
+OUTPUT_FILE = os.path.join(_REPO_ROOT, "index.html")
 
 GROUP_ORDER = ["A", "B", "C"]
 GROUP_LABELS = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}  # internal/admin

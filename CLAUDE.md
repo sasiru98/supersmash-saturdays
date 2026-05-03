@@ -22,10 +22,10 @@ A local Flask tournament manager for a weekly badminton social. Admin runs it on
 ## Files to know
 | File | Purpose |
 |---|---|
-| `setup.py` | One-time interactive pipeline — parses players, assigns groups, generates pairs/schedule, writes `tournament.json` and `players.txt` |
-| `validate.py` | Called on `app.py` startup — validates `players.txt`, detects group changes, offers to regenerate |
-| `generate_index.py` | Derives standings, grids, schedules from `tournament.json`, writes `index.html` |
-| `app.py` | Flask server — 4 API endpoints: `/api/score`, `/api/team_name`, `/api/publish`, `/api/data` |
+| `core/setup.py` | One-time interactive pipeline — parses players, assigns groups, generates pairs/schedule, writes `tournament.json` and `players.txt` |
+| `core/validate.py` | Called on `app.py` startup — validates `players.txt`, detects group changes, offers to regenerate |
+| `core/generate_index.py` | Derives standings, grids, schedules from `tournament.json`, writes `index.html` |
+| `core/app.py` | Flask server — 4 API endpoints: `/api/score`, `/api/team_name`, `/api/publish`, `/api/data` |
 | `players.txt` | Editable after setup — sectioned by group, rewritten after each confirmed setup |
 | `todo.md` | Planned features — check here before adding anything new |
 

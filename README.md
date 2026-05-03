@@ -51,7 +51,7 @@ Adding gender lets setup prioritise mixed pairs within each group.
 ### 3. Run setup
 
 ```bash
-python setup.py
+python core/setup.py
 ```
 
 The setup pipeline will:
@@ -91,7 +91,7 @@ To move a player, cut their line and paste it under a different section header. 
 ### 5. Start the admin server
 
 ```bash
-python app.py
+python core/app.py
 ```
 
 On startup it validates `players.txt` against `tournament.json` and reports any issues before the server starts. The admin panel runs on your local network (port 5000):
@@ -155,13 +155,14 @@ If `players.txt` has issues, `app.py` will refuse to start and show exactly what
 ## Project structure
 
 ```
-players.txt          # Player list with skill ratings (editable after setup)
-setup.py             # One-time tournament setup pipeline
-validate.py          # Validates players.txt and syncs tournament.json on startup
-generate_index.py    # Generates public index.html from tournament.json
-app.py               # Flask admin server (local only)
+core/
+  setup.py           # One-time tournament setup pipeline
+  app.py             # Flask admin server (local only)
+  validate.py        # Validates players.txt and syncs tournament.json on startup
+  generate_index.py  # Generates public index.html from tournament.json
 templates/
   admin.html         # Admin score entry panel
+players.txt          # Player list with skill ratings (editable after setup)
 index.html           # Public standings page (GitHub Pages)
 tournament.json      # Raw tournament state — gitignored, local only
 ```

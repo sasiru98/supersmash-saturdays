@@ -7,9 +7,11 @@ import subprocess
 import sys
 from itertools import combinations
 
-SKILL_ORDER = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"]
-GROUP_NAMES = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
-DATA_FILE = "tournament.json"
+_REPO_ROOT   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKILL_ORDER  = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"]
+GROUP_NAMES  = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
+DATA_FILE    = os.path.join(_REPO_ROOT, "tournament.json")
+PLAYERS_FILE = os.path.join(_REPO_ROOT, "players.txt")
 
 
 
@@ -22,7 +24,9 @@ def strip_invisible(s):
 VALID_GENDERS = {"M", "F"}
 
 
-def parse_players(filepath="players.txt"):
+def parse_players(filepath=None):
+    if filepath is None:
+        filepath = PLAYERS_FILE
     players = []
     skipped = []
     try:
@@ -155,7 +159,9 @@ def edit_groups(groups):
             print("  Unknown option.")
 
 
-def write_players_txt(groups, filepath="players.txt"):
+def write_players_txt(groups, filepath=None):
+    if filepath is None:
+        filepath = PLAYERS_FILE
     lines = []
     for g, label in GROUP_NAMES.items():
         lines.append(f"# {label}")
@@ -384,7 +390,7 @@ def git_push_initial():
             ["git", "push", "origin", "main"],
         ]
         for cmd in cmds:
-            result = subprocess.run(cmd, capture_output=True, text=True, cwd=".")
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=_REPO_ROOT)
             if result.returncode != 0:
                 print(f"  Git error: {result.stderr.strip()}")
                 return False
@@ -401,11 +407,11 @@ def main():
     print("=" * 50)
 
     # Step 1: Load players
-    if not os.path.exists("players.txt"):
+    if not os.path.exists(PLAYERS_FILE):
         print("  players.txt not found. Create it first.")
         sys.exit(1)
 
-    players = parse_players("players.txt")
+    players = parse_players()
     print(f"\n  Loaded {len(players)} players from players.txt")
     groups = assign_groups(players)
 
