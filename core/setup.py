@@ -3,15 +3,16 @@
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 from itertools import combinations
 
 _REPO_ROOT   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKILL_ORDER  = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"]
-GROUP_NAMES  = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
 DATA_FILE    = os.path.join(_REPO_ROOT, "tournament.json")
 PLAYERS_FILE = os.path.join(_REPO_ROOT, "players.txt")
+
+from constants import GROUP_NAMES, SKILL_ORDER, VALID_GENDERS
 
 
 
@@ -21,20 +22,12 @@ def strip_invisible(s):
     return ''.join(c for c in s if c not in invisible).strip()
 
 
-VALID_GENDERS = {"M", "F"}
-
-
 def parse_players(filepath=None):
     if filepath is None:
         filepath = PLAYERS_FILE
     players = []
     skipped = []
-    try:
-        f = open(filepath, "r", encoding="utf-8")
-    except UnicodeDecodeError:
-        f = open(filepath, "r", encoding="utf-8-sig")
-
-    with f:
+    with open(filepath, "r", encoding="utf-8-sig") as f:
         for lineno, raw in enumerate(f, 1):
             line = strip_invisible(raw)
             if not line or line.startswith("#"):
@@ -109,11 +102,39 @@ def display_groups(groups):
             print(f"    {i:2}. {p['name']} ({p['rating']})")
 
 
+def _group_size_problems(groups):
+    """Return a list of human-readable problems with group sizes."""
+    problems = []
+    for g, label in GROUP_NAMES.items():
+        n = len(groups[g])
+        if n < 2:
+            problems.append(f"  {label} has {n} player(s) — need at least 2")
+        elif n % 2 != 0:
+            problems.append(f"  {label} has {n} players (odd) — add or remove 1 so everyone can be paired")
+    sizes = [len(groups[g]) for g in ["A", "B", "C"]]
+    if len(set(sizes)) > 1:
+        size_str = ", ".join(f"{GROUP_NAMES[g]}={len(groups[g])}" for g in ["A", "B", "C"])
+        problems.append(
+            f"  Unequal group sizes ({size_str})"
+            f" — move players until all groups have the same count"
+            f" (equal groups = equal pairs = balanced teams)"
+        )
+    return problems
+
+
 def edit_groups(groups):
     while True:
+        problems = _group_size_problems(groups)
+        if problems:
+            print("\n  ⚠ Fix before continuing:")
+            for p in problems:
+                print(p)
         print("\nOptions: [c]ontinue, [m]ove player, [r]emove player")
         choice = input("  > ").strip().lower()
         if choice == "c":
+            if problems:
+                print("  Cannot continue until group sizes are balanced.")
+                continue
             break
         elif choice == "m":
             name = input("  Player name to move: ").strip()
@@ -374,7 +395,12 @@ def build_tournament_data(groups, all_pairs, teams):
 def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    backup_dir = os.path.join(_REPO_ROOT, "backups")
+    os.makedirs(backup_dir, exist_ok=True)
+    bak = os.path.join(backup_dir, "tournament.session.bak")
+    shutil.copy2(DATA_FILE, bak)
     print(f"\n  Saved tournament state to {DATA_FILE}")
+    print(f"  Backup written to         {bak}")
 
 
 def git_push_initial():

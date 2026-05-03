@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>tailwind.config = { darkMode: 'class' }</script>
   <style>
     * { font-family: 'Inter', system-ui, sans-serif; }
@@ -72,16 +73,103 @@
           <p class="text-xs text-slate-500">Score Entry Panel</p>
         </div>
       </div>
-      <button id="publishBtn"
-        class="relative bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 active:scale-95 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-all shadow-lg shadow-green-900/30">
-        Publish
-      </button>
+      <div class="flex items-center gap-2">
+        {% if pages_url %}
+        <button id="qrBtn" title="Show QR code for players"
+          class="bg-[#0f172a] hover:bg-[#1e293b] border border-white/10 text-slate-400 hover:text-slate-200 px-3 py-2 rounded-xl text-sm transition-all">
+          📱 QR
+        </button>
+        {% endif %}
+        <button id="restoreBtn" title="Restore from backup"
+          class="bg-[#0f172a] hover:bg-[#1e293b] border border-white/10 text-slate-400 hover:text-slate-200 px-3 py-2 rounded-xl text-sm transition-all">
+          ↩ Restore
+        </button>
+        <button id="publishBtn"
+          class="relative bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 active:scale-95 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-all shadow-lg shadow-green-900/30">
+          Publish
+        </button>
+        <button id="finaliseBtn" disabled
+          title="All scores must be entered before finalising"
+          class="relative bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 active:scale-95 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-all shadow-lg shadow-amber-900/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-amber-600 disabled:hover:to-amber-700">
+          🏆 Finalise
+        </button>
+      </div>
     </div>
   </header>
 
+  {% if pages_url %}
+  <!-- QR code panel -->
+  <div id="qrPanel" class="hidden border-b border-white/5 bg-[#080d14]">
+    <div class="max-w-2xl mx-auto px-4 py-5 flex flex-col items-center gap-3">
+      <div id="qrCode" class="bg-white p-3 rounded-2xl"></div>
+      <p class="text-xs text-slate-400 font-mono">{{ pages_url }}</p>
+      <button id="copyUrlBtn" class="text-xs text-slate-500 hover:text-green-400 transition-colors">Copy link</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Restore panel -->
+  <div id="restorePanel" class="hidden border-b border-white/5 bg-[#080d14]">
+    <div class="max-w-2xl mx-auto px-4 py-4 space-y-2">
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Restore from backup</p>
+      <div id="restoreSessionRow" class="flex items-center justify-between bg-[#0d1625] border border-white/5 rounded-xl px-4 py-3">
+        <div>
+          <p class="text-sm font-semibold text-slate-200">Session backup</p>
+          <p id="restoreSessionTime" class="text-xs text-slate-500 mt-0.5">Loading…</p>
+        </div>
+        <button class="restore-action-btn text-xs font-semibold bg-amber-950/60 hover:bg-amber-900/60 border border-amber-900/50 text-amber-300 px-3 py-1.5 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          data-backup="session" data-label="session backup">
+          Restore
+        </button>
+      </div>
+      <div id="restorePreRegenRow" class="flex items-center justify-between bg-[#0d1625] border border-white/5 rounded-xl px-4 py-3">
+        <div>
+          <p class="text-sm font-semibold text-slate-200">Pre-regeneration backup</p>
+          <p id="restorePreRegenTime" class="text-xs text-slate-500 mt-0.5">Loading…</p>
+        </div>
+        <button class="restore-action-btn text-xs font-semibold bg-amber-950/60 hover:bg-amber-900/60 border border-amber-900/50 text-amber-300 px-3 py-1.5 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          data-backup="pre_regen" data-label="pre-regeneration backup">
+          Restore
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Restore confirm modal -->
+  <div id="restoreModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="restoreModalOverlay"></div>
+    <div class="relative bg-[#0d1a2a] border border-amber-900/50 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+      <div class="text-2xl mb-3">⚠️</div>
+      <h3 class="text-base font-bold text-white mb-1">Restore scores?</h3>
+      <p id="restoreModalMsg" class="text-sm text-slate-400 mb-5"></p>
+      <div class="flex gap-3">
+        <button id="restoreModalCancel"
+          class="flex-1 bg-[#0f172a] hover:bg-[#1e293b] border border-white/10 text-slate-300 font-semibold py-2 rounded-xl text-sm transition-all">
+          Cancel
+        </button>
+        <button id="restoreModalConfirm"
+          class="flex-1 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-semibold py-2 rounded-xl text-sm transition-all">
+          Yes, restore
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Publish status toast -->
   <div id="publishStatus" class="hidden max-w-2xl mx-auto px-4 pt-3">
-    <div id="publishMsg" class="rounded-xl px-4 py-3 text-sm font-medium"></div>
+    <div id="publishMsg" class="rounded-xl px-4 py-3 text-sm font-medium">
+      <div id="publishHeadline" class="font-semibold mb-2"></div>
+      <ol id="publishSteps" class="space-y-0.5 text-xs font-mono"></ol>
+    </div>
+  </div>
+
+  <!-- Finalise status toast -->
+  <div id="finaliseStatus" class="hidden max-w-2xl mx-auto px-4 pt-3">
+    <div id="finaliseMsg" class="rounded-xl px-4 py-3 text-sm font-medium">
+      <div id="finaliseHeadline" class="font-semibold mb-2"></div>
+      <ol id="finaliseSteps" class="space-y-0.5 text-xs font-mono mb-2"></ol>
+      <div id="finaliseLinks" class="hidden pt-2 border-t border-white/10 space-y-1 text-xs"></div>
+    </div>
   </div>
 
   <main class="max-w-2xl mx-auto px-4 py-5">
@@ -119,6 +207,13 @@
 
   <script>
     const DATA = {{ data | tojson }};
+    {% if pages_url %}
+    const PAGES_URL = {{ pages_url | tojson }};
+    {% endif %}
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
 
     // ── Tab switching ────────────────────────────────────────────
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -131,7 +226,25 @@
     });
 
     function pairName(pairObj) {
-      return pairObj.players[0] + ' & ' + pairObj.players[1];
+      return esc(pairObj.players[0]) + ' &amp; ' + esc(pairObj.players[1]);
+    }
+
+    // ── Score validation ─────────────────────────────────────────
+    function scoreWarning(s1, s2) {
+      const a = parseInt(s1), b = parseInt(s2);
+      if (isNaN(a) || isNaN(b) || (s1 === '' && s2 === '')) return '';
+      if (a === b)               return '⚠ Scores cannot be equal';
+      if (a > 30 || b > 30)      return '⚠ Score exceeds maximum of 30';
+      const lo = Math.min(a, b);
+      const hi = Math.max(a, b);
+      if (lo >= 20 && hi - lo < 2) return '⚠ Must win by 2 when both reach 20';
+      return '';
+    }
+
+    function updateWarning(card) {
+      const inputs  = card.querySelectorAll('.score-input');
+      const warning = card.querySelector('.score-warning');
+      if (warning) warning.textContent = scoreWarning(inputs[0].value, inputs[1].value);
     }
 
     // ── Save score ───────────────────────────────────────────────
@@ -147,16 +260,14 @@
           card.classList.remove('saved-flash');
           void card.offsetWidth;
           card.classList.add('saved-flash');
-          // Update saved indicator
           const indicator = card.querySelector('.save-indicator');
           if (indicator) {
             indicator.textContent = 'Saved';
             indicator.classList.remove('text-slate-600');
             indicator.classList.add('text-green-500');
-            setTimeout(() => {
-              indicator.textContent = '';
-            }, 2000);
+            setTimeout(() => { indicator.textContent = ''; }, 2000);
           }
+          updateWarning(card);
         }
       });
     }
@@ -203,8 +314,8 @@
           const p2 = pairs[match.pair2];
           const n1 = pairName(p1);
           const n2 = pairName(p2);
-          const t1 = p1.team || '';
-          const t2 = p2.team || '';
+          const t1 = esc(p1.team || '');
+          const t2 = esc(p2.team || '');
           const isLive = isCurrent && (match.score1 === null || match.score2 === null);
           const isDone = match.score1 !== null && match.score2 !== null;
 
@@ -234,16 +345,30 @@
               </div>
             </div>`;
 
-          // Save indicator
-          const indicatorRow = `<div class="flex justify-center mt-1.5"><span class="save-indicator text-xs text-slate-600 h-4"></span></div>`;
+          // Save indicator + score warning
+          const indicatorRow = `
+            <div class="flex items-center justify-between mt-1.5 px-1">
+              <span class="score-warning text-xs text-amber-400 flex-1"></span>
+              <span class="save-indicator text-xs text-slate-600 h-4"></span>
+            </div>`;
 
           card.innerHTML = (t1 || t2 ? teamRow : '') + scoreRow + indicatorRow;
 
+          // Populate warning for already-saved scores
+          if (match.score1 !== null && match.score2 !== null) {
+            const w = card.querySelector('.score-warning');
+            if (w) w.textContent = scoreWarning(match.score1, match.score2);
+          }
+
           // Wire up save
           card.querySelectorAll('.score-input').forEach(input => {
+            input.addEventListener('focus', () => { input.dataset.original = input.value; });
             const save = () => {
               const inputs = card.querySelectorAll('.score-input');
+              const changed = Array.from(inputs).some(i => i.value !== i.dataset.original);
+              if (!changed) return;
               saveScore(groupKey, rIdx, mIdx, inputs[0].value.trim(), inputs[1].value.trim(), card);
+              inputs.forEach(i => { i.dataset.original = i.value; });
             };
             input.addEventListener('blur', save);
             input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); e.target.blur(); } });
@@ -267,21 +392,21 @@
           <div class="flex items-center gap-2 mb-4">
             <input type="text"
               class="bg-[#0a0f1a] border border-[#1e293b] focus:border-green-600 focus:ring-2 focus:ring-green-900/40 rounded-xl px-3 py-2 text-green-300 font-bold text-base flex-1 outline-none transition-all"
-              value="${team.name}" data-idx="${idx}" />
+              value="${esc(team.name)}" data-idx="${idx}" />
             <button class="save-team-btn bg-[#0f2318] hover:bg-green-900/60 border border-green-900/50 text-green-400 text-xs px-4 py-2 rounded-xl font-semibold transition-all" data-idx="${idx}">Save</button>
           </div>
           <div class="space-y-2">
             <div class="flex items-center gap-3">
               <span class="text-xs font-semibold bg-green-950/70 text-green-400 border border-green-900/40 px-2.5 py-1 rounded-lg w-[90px] text-center">Advanced</span>
-              <span class="text-sm text-slate-300">${team.A[0]} &amp; ${team.A[1]}</span>
+              <span class="text-sm text-slate-300">${esc(team.A[0])} &amp; ${esc(team.A[1])}</span>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-xs font-semibold bg-blue-950/70 text-blue-400 border border-blue-900/40 px-2.5 py-1 rounded-lg w-[90px] text-center">Intermediate</span>
-              <span class="text-sm text-slate-300">${team.B[0]} &amp; ${team.B[1]}</span>
+              <span class="text-sm text-slate-300">${esc(team.B[0])} &amp; ${esc(team.B[1])}</span>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-xs font-semibold bg-yellow-950/70 text-yellow-400 border border-yellow-900/40 px-2.5 py-1 rounded-lg w-[90px] text-center">Beginner</span>
-              <span class="text-sm text-slate-300">${team.C[0]} &amp; ${team.C[1]}</span>
+              <span class="text-sm text-slate-300">${esc(team.C[0])} &amp; ${esc(team.C[1])}</span>
             </div>
           </div>`;
         container.appendChild(div);
@@ -317,32 +442,230 @@
       const btn = document.getElementById('publishBtn');
       btn.disabled = true;
       btn.textContent = 'Publishing…';
-      const statusDiv = document.getElementById('publishStatus');
-      const msgDiv = document.getElementById('publishMsg');
+
+      const statusDiv    = document.getElementById('publishStatus');
+      const msgDiv       = document.getElementById('publishMsg');
+      const headlineEl   = document.getElementById('publishHeadline');
+      const stepsEl      = document.getElementById('publishSteps');
+
       statusDiv.classList.remove('hidden');
-      msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-medium bg-slate-800/80 text-slate-400 border border-slate-700';
-      msgDiv.textContent = 'Pushing to GitHub Pages…';
+      msgDiv.className   = 'rounded-xl px-4 py-3 text-sm bg-slate-800/80 text-slate-400 border border-slate-700';
+      headlineEl.textContent = 'Pushing to GitHub Pages…';
+      stepsEl.innerHTML  = '';
+
+      let hideTimer = null;
 
       fetch('/api/publish', { method: 'POST' })
         .then(r => r.json())
         .then(res => {
+          const steps = res.steps || [];
+
           if (res.ok) {
-            msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-semibold bg-green-950/80 text-green-300 border border-green-900';
-            msgDiv.textContent = '✓ Published to GitHub Pages';
+            msgDiv.className = 'rounded-xl px-4 py-3 text-sm bg-green-950/80 text-green-300 border border-green-900';
+            headlineEl.textContent = '✓ Published to GitHub Pages';
+            stepsEl.innerHTML = steps.map(s =>
+              `<li class="text-green-700">✓ ${s}</li>`
+            ).join('');
+            hideTimer = setTimeout(() => statusDiv.classList.add('hidden'), 8000);
           } else {
-            msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-semibold bg-red-950/80 text-red-300 border border-red-900';
-            msgDiv.textContent = 'Error: ' + (res.errors || []).join('; ');
+            msgDiv.className = 'rounded-xl px-4 py-3 text-sm bg-red-950/80 text-red-400 border border-red-900';
+            headlineEl.textContent = '✗ Publish failed';
+            const completedHtml = steps.map(s =>
+              `<li class="text-slate-600">✓ ${s}</li>`
+            ).join('');
+            const errorHtml = (res.errors || []).map(e =>
+              `<li class="text-red-400">✗ ${e}</li>`
+            ).join('');
+            stepsEl.innerHTML = completedHtml + errorHtml;
           }
+
           btn.disabled = false;
           btn.textContent = 'Publish';
-          setTimeout(() => statusDiv.classList.add('hidden'), 5000);
+
+          // Clicking the toast dismisses it early
+          msgDiv.style.cursor = 'pointer';
+          msgDiv.onclick = () => {
+            clearTimeout(hideTimer);
+            statusDiv.classList.add('hidden');
+            msgDiv.onclick = null;
+          };
         })
         .catch(err => {
-          msgDiv.className = 'rounded-xl px-4 py-3 text-sm font-semibold bg-red-950/80 text-red-300 border border-red-900';
-          msgDiv.textContent = 'Network error: ' + err.message;
+          msgDiv.className   = 'rounded-xl px-4 py-3 text-sm bg-red-950/80 text-red-400 border border-red-900';
+          headlineEl.textContent = '✗ Network error: ' + err.message;
+          stepsEl.innerHTML  = '';
           btn.disabled = false;
           btn.textContent = 'Publish';
         });
+    });
+
+    // ── Finalise ─────────────────────────────────────────────────
+    function allScoresComplete() {
+      for (const gd of Object.values(DATA.groups)) {
+        for (const round of gd.rounds) {
+          for (const match of round) {
+            if (match.score1 === null || match.score2 === null) return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    const finaliseBtn = document.getElementById('finaliseBtn');
+    if (allScoresComplete()) {
+      finaliseBtn.disabled = false;
+      finaliseBtn.title = 'Publish final results to GitHub Pages archive';
+    }
+
+    finaliseBtn.addEventListener('click', () => {
+      finaliseBtn.disabled = true;
+      finaliseBtn.textContent = 'Finalising…';
+
+      const statusDiv  = document.getElementById('finaliseStatus');
+      const msgDiv     = document.getElementById('finaliseMsg');
+      const headlineEl = document.getElementById('finaliseHeadline');
+      const stepsEl    = document.getElementById('finaliseSteps');
+      const linksEl    = document.getElementById('finaliseLinks');
+
+      statusDiv.classList.remove('hidden');
+      msgDiv.className   = 'rounded-xl px-4 py-3 text-sm bg-slate-800/80 text-slate-400 border border-slate-700';
+      headlineEl.textContent = 'Finalising tournament…';
+      stepsEl.innerHTML  = '';
+      linksEl.classList.add('hidden');
+      linksEl.innerHTML  = '';
+
+      let hideTimer = null;
+
+      fetch('/api/finalise', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+        .then(r => r.json())
+        .then(res => {
+          const steps = res.steps || [];
+
+          if (res.ok) {
+            msgDiv.className = 'rounded-xl px-4 py-3 text-sm bg-amber-950/80 text-amber-300 border border-amber-900';
+            headlineEl.textContent = '🏆 Tournament finalised!';
+            stepsEl.innerHTML = steps.map(s => `<li class="text-amber-700">✓ ${s}</li>`).join('');
+
+            if (res.results_url || res.archive_url) {
+              linksEl.classList.remove('hidden');
+              if (res.results_url) {
+                linksEl.innerHTML += `<div><a href="${esc(res.results_url)}" target="_blank" class="text-amber-400 hover:text-amber-300 underline">📄 Results page</a></div>`;
+              }
+              if (res.archive_url) {
+                linksEl.innerHTML += `<div><a href="${esc(res.archive_url)}" target="_blank" class="text-amber-400 hover:text-amber-300 underline">📋 Tournament archive</a></div>`;
+              }
+            }
+          } else {
+            msgDiv.className = 'rounded-xl px-4 py-3 text-sm bg-red-950/80 text-red-400 border border-red-900';
+            headlineEl.textContent = '✗ Finalise failed';
+            const completedHtml = steps.map(s => `<li class="text-slate-600">✓ ${s}</li>`).join('');
+            const errorHtml = (res.errors || []).map(e => `<li class="text-red-400">✗ ${e}</li>`).join('');
+            stepsEl.innerHTML = completedHtml + errorHtml;
+            finaliseBtn.disabled = false;
+          }
+
+          finaliseBtn.textContent = '🏆 Finalise';
+
+          msgDiv.style.cursor = 'pointer';
+          msgDiv.onclick = () => {
+            clearTimeout(hideTimer);
+            statusDiv.classList.add('hidden');
+            msgDiv.onclick = null;
+          };
+        })
+        .catch(err => {
+          msgDiv.className   = 'rounded-xl px-4 py-3 text-sm bg-red-950/80 text-red-400 border border-red-900';
+          headlineEl.textContent = '✗ Network error: ' + err.message;
+          stepsEl.innerHTML  = '';
+          finaliseBtn.disabled = false;
+          finaliseBtn.textContent = '🏆 Finalise';
+        });
+    });
+
+    // ── QR code ──────────────────────────────────────────────────
+    {% if pages_url %}
+    let _qrGenerated = false;
+    document.getElementById('qrBtn').addEventListener('click', () => {
+      const panel = document.getElementById('qrPanel');
+      const isHidden = panel.classList.toggle('hidden');
+      if (!isHidden && !_qrGenerated) {
+        new QRCode(document.getElementById('qrCode'), {
+          text: PAGES_URL, width: 200, height: 200,
+          colorDark: '#000000', colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        _qrGenerated = true;
+      }
+    });
+    document.getElementById('copyUrlBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(PAGES_URL).then(() => {
+        const btn = document.getElementById('copyUrlBtn');
+        btn.textContent = '✓ Copied';
+        setTimeout(() => { btn.textContent = 'Copy link'; }, 2000);
+      });
+    });
+    {% endif %}
+
+    // ── Restore ──────────────────────────────────────────────────
+    let _pendingBackup = null;
+
+    function openRestorePanel() {
+      document.getElementById('restorePanel').classList.toggle('hidden');
+      fetch('/api/backups').then(r => r.json()).then(info => {
+        const s = info.session;
+        const p = info.pre_regen;
+        document.getElementById('restoreSessionTime').textContent  = s.exists  ? s.time  : 'No backup available';
+        document.getElementById('restorePreRegenTime').textContent = p.exists  ? p.time  : 'No backup available';
+        document.querySelectorAll('.restore-action-btn').forEach(btn => {
+          const key = btn.dataset.backup;
+          btn.disabled = key === 'session' ? !s.exists : !p.exists;
+        });
+      });
+    }
+
+    document.getElementById('restoreBtn').addEventListener('click', openRestorePanel);
+
+    document.querySelectorAll('.restore-action-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _pendingBackup = btn.dataset.backup;
+        const timeEl = _pendingBackup === 'session'
+          ? document.getElementById('restoreSessionTime')
+          : document.getElementById('restorePreRegenTime');
+        document.getElementById('restoreModalMsg').textContent =
+          'This will replace all current scores with the ' + btn.dataset.label +
+          ' (' + timeEl.textContent + '). This cannot be undone.';
+        document.getElementById('restoreModal').classList.remove('hidden');
+      });
+    });
+
+    function closeRestoreModal() {
+      document.getElementById('restoreModal').classList.add('hidden');
+      _pendingBackup = null;
+    }
+    document.getElementById('restoreModalCancel').addEventListener('click', closeRestoreModal);
+    document.getElementById('restoreModalOverlay').addEventListener('click', closeRestoreModal);
+
+    document.getElementById('restoreModalConfirm').addEventListener('click', () => {
+      const confirmBtn = document.getElementById('restoreModalConfirm');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Restoring…';
+      fetch('/api/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backup: _pendingBackup })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.ok) { location.reload(); }
+        else {
+          closeRestoreModal();
+          alert('Restore failed: ' + (res.error || 'Unknown error'));
+        }
+      })
+      .catch(() => {
+        closeRestoreModal();
+        alert('Network error during restore.');
+      });
     });
 
     // ── Init ─────────────────────────────────────────────────────

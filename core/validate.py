@@ -3,13 +3,13 @@
 
 import json
 import os
+import shutil
 
 _REPO_ROOT   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKILL_ORDER   = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"]
-GROUP_NAMES   = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
-VALID_GENDERS = {"M", "F"}
 DATA_FILE    = os.path.join(_REPO_ROOT, "tournament.json")
 PLAYERS_FILE = os.path.join(_REPO_ROOT, "players.txt")
+
+from constants import GROUP_NAMES, SKILL_ORDER, VALID_GENDERS
 
 # Zero-width and invisible Unicode characters (by code point — no copy-paste ambiguity)
 INVISIBLE = {
@@ -130,6 +130,19 @@ def parse_players_sectioned(filepath=PLAYERS_FILE):
         n = len(groups[g])
         if n < 2:
             errors.append(f"  {label} group has {n} player(s) — need at least 2 to make a pair")
+        elif n % 2 != 0:
+            errors.append(
+                f"  {label} group has {n} players (odd) — add or remove 1 player so everyone can be paired"
+            )
+
+    sizes = [len(groups[g]) for g in ["A", "B", "C"]]
+    if len(set(sizes)) > 1:
+        size_str = ", ".join(f"{GROUP_NAMES[g]}={len(groups[g])}" for g in ["A", "B", "C"])
+        errors.append(
+            f"  Groups have unequal sizes ({size_str})"
+            f" — move players between sections until all groups have the same count"
+            f" (equal groups = equal pairs = balanced teams)"
+        )
 
     return groups, errors
 
@@ -167,6 +180,12 @@ def diff_groups(groups, data):
 
 def regenerate_from_groups(groups):
     from setup import make_pairs, make_teams, build_tournament_data, save_data
+    if os.path.exists(DATA_FILE):
+        backup_dir = os.path.join(_REPO_ROOT, "backups")
+        os.makedirs(backup_dir, exist_ok=True)
+        pre_regen_bak = os.path.join(backup_dir, "tournament.pre-regen.bak")
+        shutil.copy2(DATA_FILE, pre_regen_bak)
+        print(f"  Scores backed up to {pre_regen_bak}")
     all_pairs = {g: make_pairs(groups[g]) for g in ["A", "B", "C"]}
     teams     = make_teams(all_pairs)
     data      = build_tournament_data(groups, all_pairs, teams)

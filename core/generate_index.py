@@ -3,6 +3,8 @@
 
 import json
 import os
+from datetime import datetime
+from html import escape as esc
 
 _REPO_ROOT  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE   = os.path.join(_REPO_ROOT, "tournament.json")
@@ -65,16 +67,16 @@ def find_current_round(rounds):
         for match in rnd:
             if match.get("score1") is None or match.get("score2") is None:
                 return i
-    return len(rounds) - 1
+    return None  # all rounds complete
 
 
 def pair_display(pair_obj):
     players = pair_obj["players"]
     team = pair_obj.get("team") or ""
-    return f"{players[0]} & {players[1]}", team
+    return f"{esc(players[0])} & {esc(players[1])}", esc(team)
 
 
-def standings_table(standings, group_data, accent):
+def standings_table(standings, group_data, accent, complete=False):
     rows = ""
     accent_styles = {
         "green": ("text-green-400", "text-green-300", "bg-green-950/60 text-green-300"),
@@ -93,12 +95,18 @@ def standings_table(standings, group_data, accent):
         rank_cell = f'<span class="text-base">{medal}</span>' if medal else f'<span class="text-slate-500 font-semibold text-sm">{s["rank"]}</span>'
         team_badge = f'<span class="text-xs {a_badge} px-1.5 py-0.5 rounded-md font-medium ml-1">{team}</span>' if team else ""
 
-        row_bg = "bg-white/[0.02]" if s["rank"] % 2 == 0 else ""
+        if complete and s["rank"] == 1:
+            row_bg = "bg-amber-950/30"
+            name_class = "font-semibold text-white text-sm"
+        else:
+            row_bg = "bg-white/[0.02]" if s["rank"] % 2 == 0 else ""
+            name_class = "font-semibold text-slate-200 text-sm"
+
         rows += f"""
         <tr class="border-b border-white/5 {row_bg} hover:bg-white/[0.04] transition-colors">
           <td class="py-2.5 px-3 text-center">{rank_cell}</td>
           <td class="py-2.5 px-3">
-            <span class="font-semibold text-slate-200 text-sm">{name}</span>{team_badge}
+            <span class="{name_class}">{name}</span>{team_badge}
           </td>
           <td class="py-2.5 px-3 text-center font-bold {a_text}">{s['W']}</td>
           <td class="py-2.5 px-3 text-center text-slate-400">{s['L']}</td>
@@ -128,14 +136,14 @@ def match_grid(group_data, standings, accent):
 
     header_cells = '<th class="p-2"></th>'
     for p in ordered:
-        first = p["players"][0].split()[0]
-        last = p["players"][1].split()[0]
+        first = esc(p["players"][0].split()[0])
+        last = esc(p["players"][1].split()[0])
         header_cells += f'<th class="p-2 text-[10px] text-slate-500 text-center font-semibold min-w-[48px] leading-tight">{first}<br/>&amp;<br/>{last}</th>'
 
     rows = ""
     for row_pair in ordered:
-        first_r = row_pair["players"][0].split()[0]
-        last_r = row_pair["players"][1].split()[0]
+        first_r = esc(row_pair["players"][0].split()[0])
+        last_r = esc(row_pair["players"][1].split()[0])
         cells = f'<td class="p-2 text-xs font-semibold text-slate-400 whitespace-nowrap pr-3">{first_r} &amp; {last_r}</td>'
         for col_pair in ordered:
             if row_pair["id"] == col_pair["id"]:
@@ -171,7 +179,7 @@ def rounds_section(group_data, current_round_idx, accent):
     a_badge = accent_map.get(accent, accent_map["green"])
     html = ""
     for r_idx, rnd in enumerate(rounds):
-        is_current = r_idx == current_round_idx
+        is_current = current_round_idx is not None and r_idx == current_round_idx
         all_done = all(m.get("score1") is not None and m.get("score2") is not None for m in rnd)
 
         if is_current:
@@ -186,8 +194,8 @@ def rounds_section(group_data, current_round_idx, accent):
         for match in rnd:
             p1 = pairs[match["pair1"]]
             p2 = pairs[match["pair2"]]
-            n1 = f"{p1['players'][0]} & {p1['players'][1]}"
-            n2 = f"{p2['players'][0]} & {p2['players'][1]}"
+            n1 = f"{esc(p1['players'][0])} & {esc(p1['players'][1])}"
+            n2 = f"{esc(p2['players'][0])} & {esc(p2['players'][1])}"
             s1, s2 = match.get("score1"), match.get("score2")
 
             if s1 is not None and s2 is not None:
@@ -216,28 +224,34 @@ def rounds_section(group_data, current_round_idx, accent):
 
 def calc_team_standings(teams, groups_data):
     """Rank teams by combined wins (primary) then combined point diff (tiebreaker)."""
-    team_stats = []
-    for t in teams:
-        total_wins = 0
-        total_diff = 0
-        for g in ["A", "B", "C"]:
-            pair_names = set(t[g])
-            gd = groups_data[g]
-            for rnd in gd["rounds"]:
-                for match in rnd:
-                    s1, s2 = match.get("score1"), match.get("score2")
-                    if s1 is None or s2 is None:
-                        continue
-                    p1_names = set(gd["pairs"][match["pair1"]]["players"])
-                    p2_names = set(gd["pairs"][match["pair2"]]["players"])
-                    if p1_names == pair_names:
-                        total_wins += 1 if s1 > s2 else 0
-                        total_diff += s1 - s2
-                    elif p2_names == pair_names:
-                        total_wins += 1 if s2 > s1 else 0
-                        total_diff += s2 - s1
-        team_stats.append({"team": t, "wins": total_wins, "diff": total_diff})
+    # (group, pair_id) → team_index, built from the canonical team name on each pair
+    name_to_idx = {t["name"]: i for i, t in enumerate(teams)}
+    pair_to_team = {}
+    for g in ["A", "B", "C"]:
+        for pair in groups_data[g]["pairs"]:
+            team_name = pair.get("team")
+            if team_name and team_name in name_to_idx:
+                pair_to_team[(g, pair["id"])] = name_to_idx[team_name]
 
+    wins  = [0] * len(teams)
+    diffs = [0] * len(teams)
+
+    for g in ["A", "B", "C"]:
+        for rnd in groups_data[g]["rounds"]:
+            for match in rnd:
+                s1, s2 = match.get("score1"), match.get("score2")
+                if s1 is None or s2 is None:
+                    continue
+                t1 = pair_to_team.get((g, match["pair1"]))
+                t2 = pair_to_team.get((g, match["pair2"]))
+                if t1 is not None:
+                    wins[t1]  += 1 if s1 > s2 else 0
+                    diffs[t1] += s1 - s2
+                if t2 is not None:
+                    wins[t2]  += 1 if s2 > s1 else 0
+                    diffs[t2] += s2 - s1
+
+    team_stats = [{"team": t, "wins": wins[i], "diff": diffs[i]} for i, t in enumerate(teams)]
     team_stats.sort(key=lambda x: (-x["wins"], -x["diff"]))
     return team_stats
 
@@ -268,7 +282,7 @@ def teams_grid(teams, groups_data):
         return f"""
             <div class="flex items-center gap-2">
               <span class="text-[10px] font-semibold uppercase tracking-wider {group_style} px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">{group_label}</span>
-              <span class="text-xs text-slate-300">{players[0]} &amp; {players[1]}{medal}</span>
+              <span class="text-xs text-slate-300">{esc(players[0])} &amp; {esc(players[1])}{medal}</span>
             </div>"""
 
     cards = ""
@@ -283,7 +297,7 @@ def teams_grid(teams, groups_data):
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
               <span class="text-xs font-bold text-slate-600 w-5">#{rank}</span>
-              <span class="text-base font-bold text-white">{t['name']}</span>
+              <span class="text-base font-bold text-white">{esc(t['name'])}</span>
             </div>
             <div class="text-right">
               <span class="text-xs text-slate-500">{s['wins']}W</span>
@@ -304,7 +318,8 @@ def group_section(g, gd, accent):
     emoji       = GROUP_EMOJI[g]
     standings = calc_standings(gd)
     current_round = find_current_round(gd["rounds"])
-    st_rows = standings_table(standings, gd, accent)
+    complete = current_round is None
+    st_rows = standings_table(standings, gd, accent, complete=complete)
     grid = match_grid(gd, standings, accent)
     rounds_html = rounds_section(gd, current_round, accent)
 
@@ -379,6 +394,40 @@ GROUP_TAB = {"A": "sun", "B": "moon", "C": "stars"}
 def generate_index():
     data = load_data()
     teams = data.get("teams", [])
+    published_at = datetime.now().strftime("%H:%M · %a %d %b")
+
+    all_complete = all(
+        find_current_round(data["groups"][g]["rounds"]) is None
+        for g in GROUP_ORDER if g in data["groups"]
+    )
+
+    total_matches  = sum(
+        len(rnd)
+        for g in GROUP_ORDER if g in data["groups"]
+        for rnd in data["groups"][g]["rounds"]
+    )
+    played_matches = sum(
+        1
+        for g in GROUP_ORDER if g in data["groups"]
+        for rnd in data["groups"][g]["rounds"]
+        for m in rnd
+        if m.get("score1") is not None and m.get("score2") is not None
+    )
+    pct = round(played_matches / total_matches * 100) if total_matches else 0
+
+    auto_refresh_js = "" if all_complete else (
+        "// Auto-refresh every 60s; pauses when tab is backgrounded to save battery\n"
+        "    let _refreshTimer;\n"
+        "    function _scheduleRefresh() {\n"
+        "      clearTimeout(_refreshTimer);\n"
+        "      _refreshTimer = setTimeout(() => location.reload(), 60000);\n"
+        "    }\n"
+        "    document.addEventListener('visibilitychange', () => {\n"
+        "      if (document.hidden) { clearTimeout(_refreshTimer); }\n"
+        "      else { _scheduleRefresh(); }\n"
+        "    });\n"
+        "    _scheduleRefresh();"
+    )
 
     t_cards = teams_grid(teams, data["groups"])
 
@@ -393,6 +442,12 @@ def generate_index():
     tab_buttons = ""
     for tab_id, label in TAB_CONFIG:
         tab_buttons += f'<button data-tab="{tab_id}" class="tab-btn whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">{label}</button>\n'
+
+    archive_link = (
+        '<div><a href="archive.html" class="text-sm text-slate-500 hover:text-green-400 transition-colors">'
+        'Past tournaments →</a></div>'
+        if os.path.exists(os.path.join(_REPO_ROOT, "archive.html")) else ""
+    )
 
     html = f"""<!DOCTYPE html>
 <html lang="en" class="dark">
@@ -422,17 +477,18 @@ def generate_index():
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="text-2xl">🏸</span>
-            <span class="text-xs font-semibold uppercase tracking-[0.2em] text-green-500">Live Tournament</span>
-          </div>
+            {"<span class=\"text-xs font-semibold uppercase tracking-[0.2em] text-amber-400\">Final Results</span>" if all_complete else "<span class=\"text-xs font-semibold uppercase tracking-[0.2em] text-green-500\">Live Tournament</span>"}</div>
           <h1 class="text-3xl font-black text-white tracking-tight leading-none">Supersmash<br/><span class="text-green-400">Saturdays</span></h1>
         </div>
         <div class="text-right mt-1">
           <div class="text-xs text-slate-600 mb-0.5">Last updated</div>
-          <div id="last-updated" class="text-xs font-semibold text-slate-400">—</div>
+          <div class="text-xs font-semibold text-slate-400">{published_at}</div>
         </div>
       </div>
     </div>
   </header>
+
+  {"<!-- Tournament complete banner --><div class=\"bg-amber-950/40 border-b border-amber-900/50\"><div class=\"max-w-2xl mx-auto px-4 py-3 flex items-center justify-center gap-3\"><span class=\"text-lg\">🏆</span><span class=\"text-sm font-bold text-amber-300 uppercase tracking-[0.15em]\">Tournament Complete</span><span class=\"text-lg\">🏆</span></div></div>" if all_complete else ""}
 
   <!-- Sticky tab bar -->
   <nav class="sticky top-0 z-10 bg-[#080d14]/95 backdrop-blur-sm border-b border-white/5">
@@ -443,7 +499,18 @@ def generate_index():
     </div>
   </nav>
 
-  <main class="max-w-2xl mx-auto px-4 py-6">
+  <!-- Match progress bar -->
+  <div class="max-w-2xl mx-auto px-4 pt-4 pb-1">
+    <div class="flex items-center justify-between mb-1.5">
+      <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{"Final" if all_complete else "Progress"}</span>
+      <span class="text-[10px] font-semibold text-slate-500">{played_matches} / {total_matches} matches</span>
+    </div>
+    <div class="h-1 rounded-full bg-white/5 overflow-hidden">
+      <div class="h-full rounded-full {"bg-amber-500" if all_complete else "bg-green-500"} transition-all" style="width:{pct}%"></div>
+    </div>
+  </div>
+
+  <main class="max-w-2xl mx-auto px-4 py-4">
 
     <!-- Teams tab -->
     <div id="tab-teams" class="tab-panel">
@@ -464,14 +531,12 @@ def generate_index():
 
   </main>
 
-  <footer class="text-center text-xs text-slate-700 pb-10 pt-4">
-    Supersmash Saturdays &bull; Powered by rallies and good vibes
+  <footer class="text-center pb-10 pt-4 space-y-2">
+    {archive_link}
+    <div class="text-xs text-slate-700">Supersmash Saturdays &bull; Powered by rallies and good vibes</div>
   </footer>
 
   <script>
-    const now = new Date();
-    document.getElementById('last-updated').textContent = now.toLocaleTimeString([], {{hour: '2-digit', minute: '2-digit'}});
-
     function showTab(id) {{
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
@@ -486,6 +551,8 @@ def generate_index():
     document.querySelectorAll('.tab-btn').forEach(btn => {{
       btn.addEventListener('click', () => showTab(btn.dataset.tab));
     }});
+
+    {auto_refresh_js}
   </script>
 </body>
 </html>"""
