@@ -74,7 +74,7 @@ def git_publish():
 
     if not run(["git", "checkout", "dev"], "Checked out dev"):
         return errors, steps
-    run(["git", "add", "tournament.json", "index.html"], "Staged files")
+    run(["git", "add", "index.html"], "Staged files")
     if not run(["git", "commit", "-m", "Update scores and standings"], "Committed to dev"):
         # Nothing to commit is not fatal — treat as already up to date
         if any("nothing to commit" in e for e in errors):
