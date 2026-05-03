@@ -1,0 +1,37 @@
+# Sample players for Supersmash Saturdays
+# Format: Name : Skill Rating : Gender (gender is optional — omit if unspecified)
+# Ratings: A+, A, A-, B+, B, B-, C+, C, C-
+# Gender:  M or F
+
+Marcus Chen : A+ : M
+Priya Sharma : A+ : F
+James Okafor : A : M
+Yuki Tanaka : A : F
+Sofia Reyes : A : F
+Daniel Park : A- : M
+Aisha Mwangi : A- : F
+Liam Novak : A- : M
+Zara Ahmed : A- : F
+Ryan Kowalski : A- : M
+
+Noah Patel : B+ : M
+Emma Johansson : B+ : F
+Carlos Diaz : B+ : M
+Mei Lin : B : F
+Trevor Wilson : B : M
+Fatima Hassan : B : F
+Ben Nakamura : B : M
+Ava Christensen : B- : F
+Louis Bernard : B- : M
+Isabelle Dubois : B- : F
+
+Grace Osei : C+ : F
+Kevin Tran : C+ : M
+Olivia Murphy : C+ : F
+Sam Fletcher : C : M
+Jade Morrison : C : F
+Raj Kapoor : C : M
+Amara Diallo : C : F
+Tom Hughes : C- : M
+Leila Nkosi : C- : F
+Chris Yamamoto : C- : M

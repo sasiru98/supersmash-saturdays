@@ -15,7 +15,7 @@ Round-robin tournament manager for Supersmash Saturdays badminton events. Player
 - Players are sorted by skill rating and split evenly into three equal groups
 - Public-facing group names are **☀️ Sun / 🌙 Moon / ⭐ Stars** — no skill labels shown to players
 - Admin panel uses **Advanced / Intermediate / Beginner** internally
-- Pairs are formed top-to-bottom within each group (1st with last, 2nd with second-last, etc.)
+- Pairs are formed within each group with mixed-gender pairs prioritised; falls back to top-to-bottom (1st with last) when gender isn't specified or the split is uneven
 - Each group runs its own full round-robin (every pair plays every other pair once)
 - Cross-skill teams assign one pair from each group together — for social mixing and mentorship
 - Standings recalculated from raw scores every time you publish (wins → point diff → points scored)
@@ -32,17 +32,21 @@ pip install flask
 
 ### 2. Edit players.txt
 
-Each line: `Name : Skill Rating`
+Each line: `Name : Skill Rating` or `Name : Skill Rating : Gender`
 
 Ratings: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C+`, `C`, `C-`
+
+Gender: `M` or `F` (optional — omit if unknown or unspecified)
 
 Order and grouping don't matter — setup sorts and splits automatically:
 
 ```
-Marcus Chen : A+
-Emma Johansson : B+
+Marcus Chen : A+ : M
+Emma Johansson : B+ : F
 Kevin Tran : C+
 ```
+
+Adding gender lets setup prioritise mixed pairs within each group.
 
 ### 3. Run setup
 
@@ -54,7 +58,7 @@ The setup pipeline will:
 - Load and validate all players
 - Sort by skill rating and split into three equal groups
 - Show the groups — confirm or move players between groups
-- Generate pairs using top-to-bottom pairing
+- Generate pairs (mixed-gender prioritised where gender is provided)
 - Assign cross-skill teams (one pair per group), optionally name them
 - Generate the full round-robin schedule
 - Write `tournament.json` and `index.html`
@@ -66,11 +70,13 @@ After setup, `players.txt` is organised into sections:
 
 ```
 # Advanced
-Tharindu : A+
+Deshawn : A+ : M
+Nonce : B- : F
+Inson : A-
 ...
 
 # Intermediate
-Rodney : B+
+John : B+
 ...
 
 # Beginner
@@ -104,7 +110,7 @@ The server prints the address on startup.
   Enter scores as matches finish. Scores auto-save on blur or Enter.
 
 - **Player phones** → https://sasiru98.github.io/supersmash-saturdays
-  Live standings, results grid, and schedule. Groups shown as ☀️ Sun / 🌙 Moon / ⭐ Stars.
+  Live standings, results grid, and schedule. Tabbed layout: **Teams / ☀️ Sun / 🌙 Moon / ⭐ Stars**. Sharing a link with `#sun` / `#moon` / `#stars` in the URL opens that tab directly.
 
 - **Publish button** → Recalculates all standings, commits to `dev`, merges to `main`, pushes to GitHub Pages.
 
@@ -118,7 +124,7 @@ If `players.txt` has issues, `app.py` will refuse to start and show exactly what
 
 | Error | Fix |
 |---|---|
-| No colon separator | Format must be `Name : Rating` |
+| No colon separator | Format must be `Name : Rating` or `Name : Rating : M/F` |
 | Unknown rating | Use one of: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C+`, `C`, `C-` |
 | Missing section header | Add `# Advanced`, `# Intermediate`, `# Beginner` |
 | Duplicate name | Each player must appear exactly once |

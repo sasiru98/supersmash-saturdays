@@ -19,6 +19,9 @@ def strip_invisible(s):
     return ''.join(c for c in s if c not in invisible).strip()
 
 
+VALID_GENDERS = {"M", "F"}
+
+
 def parse_players(filepath="players.txt"):
     players = []
     skipped = []
@@ -32,18 +35,22 @@ def parse_players(filepath="players.txt"):
             line = strip_invisible(raw)
             if not line or line.startswith("#"):
                 continue
-            parts = line.split(":")
+            parts = [strip_invisible(p) for p in line.split(":")]
             if len(parts) < 2:
                 print(f"  [line {lineno}] SKIP — no colon separator: {repr(raw.rstrip())}")
                 skipped.append(lineno)
                 continue
-            if len(parts) > 2:
-                # Allow names with colons by only splitting on the last colon
-                name = strip_invisible(":".join(parts[:-1]))
-                rating = strip_invisible(parts[-1])
+
+            # Support: Name : Rating  OR  Name : Rating : M/F
+            last = parts[-1].upper()
+            if last in VALID_GENDERS and len(parts) >= 3:
+                gender = last
+                rating = parts[-2]
+                name = strip_invisible(":".join(parts[:-2]))
             else:
-                name = strip_invisible(parts[0])
-                rating = strip_invisible(parts[1])
+                gender = None
+                rating = parts[-1]
+                name = strip_invisible(":".join(parts[:-1]))
 
             if not name:
                 print(f"  [line {lineno}] SKIP — empty name after stripping: {repr(raw.rstrip())}")
@@ -53,8 +60,12 @@ def parse_players(filepath="players.txt"):
                 print(f"  [line {lineno}] SKIP — unknown rating '{rating}' for '{name}' (expected one of {', '.join(SKILL_ORDER)})")
                 skipped.append(lineno)
                 continue
-            players.append({"name": name, "rating": rating})
-            print(f"  [line {lineno}] OK   — {name} ({rating})")
+            player = {"name": name, "rating": rating}
+            if gender:
+                player["gender"] = gender
+            players.append(player)
+            gender_str = f", {gender}" if gender else ""
+            print(f"  [line {lineno}] OK   — {name} ({rating}{gender_str})")
 
     if skipped:
         print(f"\n  WARNING: {len(skipped)} line(s) skipped (lines {skipped})")
@@ -149,7 +160,10 @@ def write_players_txt(groups, filepath="players.txt"):
     for g, label in GROUP_NAMES.items():
         lines.append(f"# {label}")
         for p in groups[g]:
-            lines.append(f"{p['name']} : {p['rating']}")
+            if p.get("gender"):
+                lines.append(f"{p['name']} : {p['rating']} : {p['gender']}")
+            else:
+                lines.append(f"{p['name']} : {p['rating']}")
         lines.append("")
     with open(filepath, "w", encoding="utf-8") as f:
         f.write("\n".join(lines).rstrip() + "\n")
@@ -157,23 +171,66 @@ def write_players_txt(groups, filepath="players.txt"):
 
 
 def make_pairs(group_players):
-    """Top-to-bottom pairing: 1st with last, 2nd with second-last, etc."""
+    """
+    Gender-aware pairing: maximise mixed (M+F) pairs, then top-to-bottom
+    skill balance within each pool. Players without a gender field are treated
+    as unspecified and fall back to the same-gender/remainder pool.
+    """
     players = list(group_players)
     if len(players) % 2 != 0:
         print(f"  Warning: odd number of players ({len(players)}), last player gets a bye.")
         players = players[:-1]
+
+    males   = [p for p in players if p.get("gender") == "M"]
+    females = [p for p in players if p.get("gender") == "F"]
+    unspec  = [p for p in players if p.get("gender") not in ("M", "F")]
+
+    has_gender = len(males) + len(females) > 0
+
     pairs = []
-    n = len(players)
+
+    if has_gender:
+        # Mixed pairs: top male with bottom female (skill-balanced across genders)
+        n_mixed = min(len(males), len(females))
+        for i in range(n_mixed):
+            pairs.append([males[i]["name"], females[len(females) - 1 - i]["name"]])
+
+        # Remaining players after mixed pairing
+        remaining = males[n_mixed:] + females[n_mixed:] + unspec
+        n_mixed_made = n_mixed
+    else:
+        remaining = players
+        n_mixed_made = 0
+
+    # Top-to-bottom pairing on the remainder
+    n = len(remaining)
     for i in range(n // 2):
-        pairs.append([players[i]["name"], players[n - 1 - i]["name"]])
+        pairs.append([remaining[i]["name"], remaining[n - 1 - i]["name"]])
+
+    if has_gender:
+        n_same = len(pairs) - n_mixed_made
+        print(f"  Pairing: {n_mixed_made} mixed pair(s), {n_same} same-gender/unspecified pair(s)")
+
     return pairs
 
 
-def display_pairs(all_pairs):
+def display_pairs(all_pairs, groups=None):
     for g, label in GROUP_NAMES.items():
         print(f"\n  [{label} Pairs]")
+        # Build a name->player lookup for gender display if groups provided
+        player_map = {}
+        if groups:
+            for p in groups[g]:
+                player_map[p["name"]] = p
         for i, pair in enumerate(all_pairs[g], 1):
-            print(f"    Pair {i}: {pair[0]} & {pair[1]}")
+            def fmt(name):
+                p = player_map.get(name)
+                if p and p.get("gender"):
+                    return f"{name} ({p['rating']}, {p['gender']})"
+                elif p:
+                    return f"{name} ({p['rating']})"
+                return name
+            print(f"    Pair {i}: {fmt(pair[0])} & {fmt(pair[1])}")
 
 
 def edit_pairs(all_pairs, groups):
@@ -364,7 +421,7 @@ def main():
         all_pairs[g] = make_pairs(groups[g])
 
     print("\n--- PAIRS ---")
-    display_pairs(all_pairs)
+    display_pairs(all_pairs, groups)
     print("\nReview the pairs above.")
     edit_pairs(all_pairs, groups)
 

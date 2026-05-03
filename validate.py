@@ -4,8 +4,9 @@
 import json
 import os
 
-SKILL_ORDER = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"]
-GROUP_NAMES  = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
+SKILL_ORDER   = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"]
+GROUP_NAMES   = {"A": "Advanced", "B": "Intermediate", "C": "Beginner"}
+VALID_GENDERS = {"M", "F"}
 DATA_FILE    = "tournament.json"
 PLAYERS_FILE = "players.txt"
 
@@ -75,10 +76,18 @@ def parse_players_sectioned(filepath=PLAYERS_FILE):
             errors.append(f"  line {lineno}: No colon separator — {repr(raw.rstrip())}")
             continue
 
-        # Split on last colon so names with colons still work
-        last_colon = line.rfind(":")
-        name   = clean(line[:last_colon])
-        rating = clean(line[last_colon + 1:])
+        parts = [clean(p) for p in line.split(":")]
+
+        # Support: Name : Rating  OR  Name : Rating : M/F
+        last = parts[-1].upper()
+        if last in VALID_GENDERS and len(parts) >= 3:
+            gender = last
+            rating = parts[-2]
+            name   = clean(":".join(parts[:-2]))
+        else:
+            gender = None
+            rating = parts[-1]
+            name   = clean(":".join(parts[:-1]))
 
         if not name:
             errors.append(f"  line {lineno}: Empty name — {repr(raw.rstrip())}")
@@ -98,7 +107,10 @@ def parse_players_sectioned(filepath=PLAYERS_FILE):
             )
             continue
 
-        groups[current_group].append({"name": name, "rating": rating})
+        player = {"name": name, "rating": rating}
+        if gender:
+            player["gender"] = gender
+        groups[current_group].append(player)
 
     # ── Cross-checks ─────────────────────────────────────────────
     for g in ["A", "B", "C"]:
