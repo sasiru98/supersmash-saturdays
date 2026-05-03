@@ -12,6 +12,8 @@
     * { font-family: 'Inter', system-ui, sans-serif; }
     body { background: #080d14; color: #f1f5f9; }
     .hero-glow { background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34,197,94,0.12), transparent); }
+    .tab-btn.active { color: #22c55e; background: rgba(34,197,94,0.1); }
+    ::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -36,17 +38,31 @@
     </div>
   </header>
 
+  <!-- Sticky tab bar -->
+  <nav class="sticky top-0 z-10 bg-[#080d14]/95 backdrop-blur-sm border-b border-white/5">
+    <div class="max-w-2xl mx-auto px-4">
+      <div class="flex gap-1 overflow-x-auto py-2">
+        <button data-tab="teams" class="tab-btn whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">Teams</button>
+<button data-tab="sun" class="tab-btn whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">☀️ Sun</button>
+<button data-tab="moon" class="tab-btn whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">🌙 Moon</button>
+<button data-tab="stars" class="tab-btn whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">⭐ Stars</button>
+
+      </div>
+    </div>
+  </nav>
+
   <main class="max-w-2xl mx-auto px-4 py-6">
 
-    <!-- Teams -->
-    <section class="mb-10">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
-        <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Cross-Skill Teams</h2>
-        <div class="h-px flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
-      </div>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        
+    <!-- Teams tab -->
+    <div id="tab-teams" class="tab-panel">
+      <section class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
+          <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Cross-Skill Teams</h2>
+          <div class="h-px flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          
         <div class="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 hover:bg-white/[0.05] transition-colors">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -221,11 +237,12 @@
             </div>
           </div>
         </div>
-      </div>
-    </section>
+        </div>
+      </section>
+    </div>
 
-    <!-- Group sections -->
-    
+    <!-- Group tabs -->
+    <div id="tab-sun" class="tab-panel hidden">
       <section class="mb-10">
         <!-- Section header -->
         <div class="flex items-center gap-3 mb-4">
@@ -448,7 +465,8 @@
             </div>
         </div></div>
         </div>
-      </section>
+      </section></div>
+<div id="tab-moon" class="tab-panel hidden">
       <section class="mb-10">
         <!-- Section header -->
         <div class="flex items-center gap-3 mb-4">
@@ -671,7 +689,8 @@
             </div>
         </div></div>
         </div>
-      </section>
+      </section></div>
+<div id="tab-stars" class="tab-panel hidden">
       <section class="mb-10">
         <!-- Section header -->
         <div class="flex items-center gap-3 mb-4">
@@ -894,7 +913,8 @@
             </div>
         </div></div>
         </div>
-      </section>
+      </section></div>
+
 
   </main>
 
@@ -905,6 +925,21 @@
   <script>
     const now = new Date();
     document.getElementById('last-updated').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+    function showTab(id) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+      const panel = document.getElementById('tab-' + id);
+      if (panel) panel.classList.remove('hidden');
+      history.replaceState(null, '', id === 'teams' ? location.pathname : '#' + id);
+    }
+
+    const initialTab = location.hash.replace('#', '') || 'teams';
+    showTab(initialTab);
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => showTab(btn.dataset.tab));
+    });
   </script>
 </body>
 </html>

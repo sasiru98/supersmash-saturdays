@@ -112,20 +112,23 @@ Replace the single scrolling page with a tabbed layout matching the admin panel.
 - Tab bar should be sticky so it's always accessible while scrolling
 
 
-## 6. Pair Performance Colours on Teams Page
+## 7. Gender-Aware Pairing
 
-On the cross-skill teams grid, show how each pair ranked within their division using a colour spectrum — no medals, just a visual heat hint.
+When generating pairs within each skill group, prioritise mixed-gender pairs (one male + one female) over same-gender pairs.
 
-### Behaviour
-- Teams sorted by their overall ranking (existing logic)
-- Within each team card, each pair row gets a left border or background tint based on their rank within their group
-- Colour spectrum across all pairs in that group: **green (1st) → yellow (mid) → red (last)**
-- Spectrum scales dynamically to however many pairs are in the group (e.g. 6 pairs = 6 steps)
-- No medals, no numbers — colour only, so it reads at a glance without feeling like a ranking
+### Pairing rules
+- **Priority 1:** Maximise the number of mixed pairs in each group
+- **Priority 2:** Where mixed pairing isn't possible (e.g. uneven gender split), fall back to same-gender pairs — best skill match within the same gender
+- Same skill-balancing logic still applies within the constraint (top with bottom, etc.)
+- Admin can still manually swap players between pairs after generation
+
+### players.txt format change
+- Add gender marker to each player line: `Name : Rating : M` or `Name : Rating : F`
+- `setup.py` and `validate.py` updated to parse and validate the gender field
+- Unknown/missing gender treated as unspecified — falls back to current pairing logic for that player
 
 ### Implementation notes
-- Rank data already available from `calc_standings()` per group
-- Pass rank and total pairs count into `teams_grid()` to calculate colour position
-- Use HSL interpolation for smooth spectrum: `hsl(120, ...)` green → `hsl(0, ...)` red
-- Subtle application — border-left or a soft background tint, not a bold fill
-- Should still look clean when no matches have been played (neutral/grey fallback)
+- Gender field is optional for backwards compatibility — if absent, treat as unspecified
+- `make_pairs()` in `setup.py` updated with gender-aware matching algorithm
+- `validate.py` accepts `M`, `F`, or absent gender — rejects any other value
+- Show gender indicator in the pairs review step during setup (e.g. `Tharindu (A+, M) & Nancy (B-, F)`)

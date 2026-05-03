@@ -365,17 +365,33 @@ def group_section(g, gd, accent):
       </section>"""
 
 
+TAB_CONFIG = [
+    ("teams", "Teams"),
+    ("sun",   "☀️ Sun"),
+    ("moon",  "🌙 Moon"),
+    ("stars", "⭐ Stars"),
+]
+
+GROUP_TAB = {"A": "sun", "B": "moon", "C": "stars"}
+
+
 def generate_index():
     data = load_data()
     teams = data.get("teams", [])
 
     t_cards = teams_grid(teams, data["groups"])
 
-    group_sections = ""
+    group_panels = ""
     for g in GROUP_ORDER:
         if g not in data["groups"]:
             continue
-        group_sections += group_section(g, data["groups"][g], GROUP_ACCENT[g])
+        tab_id = GROUP_TAB[g]
+        inner = group_section(g, data["groups"][g], GROUP_ACCENT[g])
+        group_panels += f'<div id="tab-{tab_id}" class="tab-panel hidden">{inner}</div>\n'
+
+    tab_buttons = ""
+    for tab_id, label in TAB_CONFIG:
+        tab_buttons += f'<button data-tab="{tab_id}" class="tab-btn whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">{label}</button>\n'
 
     html = f"""<!DOCTYPE html>
 <html lang="en" class="dark">
@@ -391,6 +407,8 @@ def generate_index():
     * {{ font-family: 'Inter', system-ui, sans-serif; }}
     body {{ background: #080d14; color: #f1f5f9; }}
     .hero-glow {{ background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34,197,94,0.12), transparent); }}
+    .tab-btn.active {{ color: #22c55e; background: rgba(34,197,94,0.1); }}
+    ::-webkit-scrollbar {{ display: none; }}
   </style>
 </head>
 <body class="min-h-screen">
@@ -415,22 +433,33 @@ def generate_index():
     </div>
   </header>
 
+  <!-- Sticky tab bar -->
+  <nav class="sticky top-0 z-10 bg-[#080d14]/95 backdrop-blur-sm border-b border-white/5">
+    <div class="max-w-2xl mx-auto px-4">
+      <div class="flex gap-1 overflow-x-auto py-2">
+        {tab_buttons}
+      </div>
+    </div>
+  </nav>
+
   <main class="max-w-2xl mx-auto px-4 py-6">
 
-    <!-- Teams -->
-    <section class="mb-10">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
-        <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Cross-Skill Teams</h2>
-        <div class="h-px flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
-      </div>
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {t_cards}
-      </div>
-    </section>
+    <!-- Teams tab -->
+    <div id="tab-teams" class="tab-panel">
+      <section class="mb-10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
+          <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Cross-Skill Teams</h2>
+          <div class="h-px flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {t_cards}
+        </div>
+      </section>
+    </div>
 
-    <!-- Group sections -->
-    {group_sections}
+    <!-- Group tabs -->
+    {group_panels}
 
   </main>
 
@@ -441,6 +470,21 @@ def generate_index():
   <script>
     const now = new Date();
     document.getElementById('last-updated').textContent = now.toLocaleTimeString([], {{hour: '2-digit', minute: '2-digit'}});
+
+    function showTab(id) {{
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+      const panel = document.getElementById('tab-' + id);
+      if (panel) panel.classList.remove('hidden');
+      history.replaceState(null, '', id === 'teams' ? location.pathname : '#' + id);
+    }}
+
+    const initialTab = location.hash.replace('#', '') || 'teams';
+    showTab(initialTab);
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {{
+      btn.addEventListener('click', () => showTab(btn.dataset.tab));
+    }});
   </script>
 </body>
 </html>"""
