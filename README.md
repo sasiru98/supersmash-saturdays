@@ -34,16 +34,16 @@ pip install flask
 
 Each line: `Name : Skill Rating` or `Name : Skill Rating : Gender`
 
-Ratings: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C+`, `C`, `C-`
+Ratings: `1` (best) to `9` (beginner)
 
 Gender: `M` or `F` (optional — omit if unknown or unspecified)
 
 Order and grouping don't matter — setup sorts and splits automatically:
 
 ```
-Marcus Chen : A+ : M
-Emma Johansson : B+ : F
-Kevin Tran : C+
+Marcus Chen : 1 : M
+Emma Johansson : 4 : F
+Kevin Tran : 7
 ```
 
 Adding gender lets setup prioritise mixed pairs within each group.
@@ -70,17 +70,17 @@ After setup, `players.txt` is organised into sections:
 
 ```
 # Advanced
-Deshawn : A+ : M
-Nonce : B- : F
-Inson : A-
+Deshawn : 1 : M
+Nonce : 6 : F
+Inson : 3
 ...
 
 # Intermediate
-John : B+
+John : 4
 ...
 
 # Beginner
-Hari : B
+Hari : 5
 ...
 ```
 
@@ -125,7 +125,7 @@ If `players.txt` has issues, `app.py` will refuse to start and show exactly what
 | Error | Fix |
 |---|---|
 | No colon separator | Format must be `Name : Rating` or `Name : Rating : M/F` |
-| Unknown rating | Use one of: `A+`, `A`, `A-`, `B+`, `B`, `B-`, `C+`, `C`, `C-` |
+| Unknown rating | Use `1` (best) to `9` (beginner) |
 | Missing section header | Add `# Advanced`, `# Intermediate`, `# Beginner` |
 | Duplicate name | Each player must appear exactly once |
 | Groups changed | Choose to regenerate (resets scores) or rerun `setup.py` |
