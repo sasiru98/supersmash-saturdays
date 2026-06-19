@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v2 -->
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
@@ -176,25 +177,38 @@
 
     <!-- Tab nav -->
     <div class="flex gap-1 mb-5 bg-[#0f172a] p-1 rounded-2xl border border-white/5">
-      <button class="tab-btn active flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="advanced">Advanced</button>
-      <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="intermediate">Intermediate</button>
-      <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="beginner">Beginner</button>
+      <button class="tab-btn active flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="courts">Courts</button>
+      <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="queue">Queue</button>
+      <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="completed">Done</button>
       <button class="tab-btn flex-1 py-2 rounded-xl text-sm font-semibold" data-tab="teams">Teams</button>
     </div>
 
-    <!-- Advanced Tab -->
-    <div id="tab-advanced" class="tab-content">
-      <div id="matches-A"></div>
+    <!-- Courts Tab -->
+    <div id="tab-courts" class="tab-content">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs text-slate-500">Courts:</span>
+        <input id="courtsInput" type="text" class="bg-[#0a0f1a] border border-[#1e293b] focus:border-green-600 rounded-lg px-2 py-1 text-xs text-slate-300 flex-1 outline-none" />
+        <button id="courtsUpdateBtn" class="text-xs font-semibold bg-[#0f172a] hover:bg-[#1e293b] border border-white/10 text-slate-400 px-3 py-1 rounded-lg transition-all">Update</button>
+      </div>
+      <div id="courts-grid" class="grid grid-cols-2 gap-3"></div>
+      <div id="umpire-section" class="mt-5">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="h-px flex-1 bg-gradient-to-r from-slate-800 to-transparent"></div>
+          <span class="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Available for Umpiring</span>
+          <div class="h-px flex-1 bg-gradient-to-l from-slate-800 to-transparent"></div>
+        </div>
+        <div id="umpire-list" class="text-sm text-slate-400">Loading...</div>
+      </div>
     </div>
 
-    <!-- Intermediate Tab -->
-    <div id="tab-intermediate" class="tab-content hidden">
-      <div id="matches-B"></div>
+    <!-- Queue Tab -->
+    <div id="tab-queue" class="tab-content hidden">
+      <div id="queue-list"></div>
     </div>
 
-    <!-- Beginner Tab -->
-    <div id="tab-beginner" class="tab-content hidden">
-      <div id="matches-C"></div>
+    <!-- Completed Tab -->
+    <div id="tab-completed" class="tab-content hidden">
+      <div id="completed-list"></div>
     </div>
 
     <!-- Teams Tab -->
@@ -247,12 +261,21 @@
       if (warning) warning.textContent = scoreWarning(inputs[0].value, inputs[1].value);
     }
 
+    const GROUP_COLORS = { A: { label: 'ADV', text: 'text-green-400', bg: 'bg-green-950/60', border: 'border-green-900/50' },
+                           B: { label: 'INT', text: 'text-blue-400',  bg: 'bg-blue-950/60',  border: 'border-blue-900/50' },
+                           C: { label: 'BEG', text: 'text-amber-400', bg: 'bg-amber-950/60', border: 'border-amber-900/50' } };
+
+    function groupBadge(g) {
+      const c = GROUP_COLORS[g] || GROUP_COLORS.A;
+      return `<span class="text-[10px] font-semibold uppercase ${c.text} ${c.bg} ${c.border} border px-1.5 py-0.5 rounded-full">${c.label}</span>`;
+    }
+
     // ── Save score ───────────────────────────────────────────────
-    function saveScore(group, roundIdx, matchIdx, s1, s2, card) {
+    function saveScore(group, matchId, s1, s2, card) {
       fetch('/api/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ group, round: roundIdx, match: matchIdx, score1: s1, score2: s2 })
+        body: JSON.stringify({ group, match_id: matchId, score1: s1, score2: s2 })
       })
       .then(r => r.json())
       .then(res => {
@@ -260,124 +283,242 @@
           card.classList.remove('saved-flash');
           void card.offsetWidth;
           card.classList.add('saved-flash');
-          const indicator = card.querySelector('.save-indicator');
-          if (indicator) {
-            indicator.textContent = 'Saved';
-            indicator.classList.remove('text-slate-600');
-            indicator.classList.add('text-green-500');
-            setTimeout(() => { indicator.textContent = ''; }, 2000);
-          }
           updateWarning(card);
         }
       });
     }
 
-    // ── Render matches ───────────────────────────────────────────
-    function renderMatches(groupKey, containerId) {
-      const gd = DATA.groups[groupKey];
-      if (!gd) return;
-      const pairs = gd.pairs;
-      const rounds = gd.rounds;
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
+    // ── Assign match to court ────────────────────────────────────
+    function assignMatch(group, matchId, court) {
+      return fetch('/api/assign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group, match_id: matchId, court })
+      }).then(r => r.json());
+    }
 
-      // Find current round
-      let currentRoundIdx = rounds.length - 1;
-      for (let i = 0; i < rounds.length; i++) {
-        if (rounds[i].some(m => m.score1 === null || m.score2 === null)) {
-          currentRoundIdx = i;
-          break;
+    function unassignMatch(group, matchId) {
+      return fetch('/api/unassign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group, match_id: matchId })
+      }).then(r => r.json());
+    }
+
+    function finaliseMatch(group, matchId) {
+      return fetch('/api/finalise_match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ group, match_id: matchId })
+      }).then(r => r.json());
+    }
+
+    // ── Render courts ────────────────────────────────────────────
+    function renderCourts() {
+      const container = document.getElementById('courts-grid');
+      container.innerHTML = '';
+      const courts = DATA.courts || [];
+
+      // Find which match is on each court
+      const courtMatch = {};
+      for (const [g, gd] of Object.entries(DATA.groups)) {
+        for (const m of gd.matches) {
+          if (m.court && (m.status === 'in_progress' || m.status === 'scored')) {
+            courtMatch[m.court] = { group: g, match: m, pairs: gd.pairs };
+          }
         }
       }
 
-      const groupColors = { A: '#22c55e', B: '#3b82f6', C: '#eab308' };
-      const accentColor = groupColors[groupKey] || '#22c55e';
+      courts.forEach(courtNum => {
+        const div = document.createElement('div');
+        const info = courtMatch[courtNum];
 
-      rounds.forEach((round, rIdx) => {
-        const allDone = round.every(m => m.score1 !== null && m.score2 !== null);
-        const isCurrent = rIdx === currentRoundIdx;
+        if (info) {
+          const m = info.match;
+          const p1 = info.pairs[m.pair1];
+          const p2 = info.pairs[m.pair2];
+          const isFinalised = m.status === 'scored';
 
-        const roundDiv = document.createElement('div');
-        roundDiv.className = 'mb-6';
-
-        // Round header
-        const headerEl = document.createElement('div');
-        headerEl.className = 'flex items-center gap-2 mb-2';
-        headerEl.innerHTML = `
-          <span class="text-xs font-semibold uppercase tracking-widest ${isCurrent ? 'text-green-400' : 'text-slate-600'}">Round ${rIdx + 1}</span>
-          ${isCurrent ? `<span class="flex items-center gap-1 text-xs text-green-400 font-medium bg-green-950/60 border border-green-900/60 px-2 py-0.5 rounded-full"><span class="live-dot w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>Live</span>` : allDone ? `<span class="text-xs text-slate-600 bg-slate-800/50 px-2 py-0.5 rounded-full">Complete</span>` : ''}
-        `;
-        roundDiv.appendChild(headerEl);
-
-        round.forEach((match, mIdx) => {
-          const p1 = pairs[match.pair1];
-          const p2 = pairs[match.pair2];
-          const n1 = pairName(p1);
-          const n2 = pairName(p2);
-          const t1 = esc(p1.team || '');
-          const t2 = esc(p2.team || '');
-          const isLive = isCurrent && (match.score1 === null || match.score2 === null);
-          const isDone = match.score1 !== null && match.score2 !== null;
-
-          const card = document.createElement('div');
-          card.className = `match-card bg-[#0d1625] border border-[#1e293b] rounded-2xl p-3 mb-2 ${isLive ? 'live' : ''}`;
-
-          // Team labels row
-          const teamRow = `
-            <div class="flex items-center justify-between mb-2.5 text-xs text-slate-500 font-medium px-1">
-              <span>${t1 ? `<span class="text-slate-400">${t1}</span>` : ''}</span>
-              <span>${t2 ? `<span class="text-slate-400">${t2}</span>` : ''}</span>
+          div.className = 'match-card live bg-[#0d1625] border border-green-900/30 rounded-2xl p-3';
+          div.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-green-400">Court ${courtNum}</span>
+              ${groupBadge(info.group)}
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-semibold text-slate-200 flex-1 truncate mr-2">${pairName(p1)}</span>
+              <input type="number" min="0" max="99" class="score-input" value="${m.score1 !== null ? m.score1 : ''}" placeholder="0" />
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-semibold text-slate-200 flex-1 truncate mr-2">${pairName(p2)}</span>
+              <input type="number" min="0" max="99" class="score-input" value="${m.score2 !== null ? m.score2 : ''}" placeholder="0" />
+            </div>
+            <div class="score-warning text-xs text-amber-400 mb-2"></div>
+            <div class="flex gap-2">
+              <button class="confirm-btn flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all
+                ${isFinalised ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}"
+                ${isFinalised ? '' : 'disabled'}>
+                ✓ Confirm
+              </button>
+              <button class="cancel-btn text-xs font-semibold bg-slate-800 hover:bg-red-950/60 text-slate-500 hover:text-red-400 py-1.5 px-3 rounded-lg transition-all">✗</button>
             </div>`;
 
-          // Scoreboard row
-          const scoreRow = `
-            <div class="flex items-center gap-2">
-              <div class="flex-1 min-w-0">
-                <div class="text-sm font-semibold text-slate-200 leading-tight truncate">${n1}</div>
-              </div>
-              <div class="flex items-center gap-1.5 shrink-0">
-                <input type="number" min="0" max="99" class="score-input" value="${match.score1 !== null ? match.score1 : ''}" placeholder="0" data-side="1" />
-                <span class="text-slate-600 font-bold text-lg">:</span>
-                <input type="number" min="0" max="99" class="score-input" value="${match.score2 !== null ? match.score2 : ''}" placeholder="0" data-side="2" />
-              </div>
-              <div class="flex-1 min-w-0 text-right">
-                <div class="text-sm font-semibold text-slate-200 leading-tight truncate">${n2}</div>
-              </div>
-            </div>`;
-
-          // Save indicator + score warning
-          const indicatorRow = `
-            <div class="flex items-center justify-between mt-1.5 px-1">
-              <span class="score-warning text-xs text-amber-400 flex-1"></span>
-              <span class="save-indicator text-xs text-slate-600 h-4"></span>
-            </div>`;
-
-          card.innerHTML = (t1 || t2 ? teamRow : '') + scoreRow + indicatorRow;
-
-          // Populate warning for already-saved scores
-          if (match.score1 !== null && match.score2 !== null) {
-            const w = card.querySelector('.score-warning');
-            if (w) w.textContent = scoreWarning(match.score1, match.score2);
+          if (m.score1 !== null && m.score2 !== null) {
+            const w = div.querySelector('.score-warning');
+            if (w) w.textContent = scoreWarning(m.score1, m.score2);
           }
 
-          // Wire up save
-          card.querySelectorAll('.score-input').forEach(input => {
+          // Score input wiring
+          div.querySelectorAll('.score-input').forEach(input => {
             input.addEventListener('focus', () => { input.dataset.original = input.value; });
             const save = () => {
-              const inputs = card.querySelectorAll('.score-input');
+              const inputs = div.querySelectorAll('.score-input');
               const changed = Array.from(inputs).some(i => i.value !== i.dataset.original);
               if (!changed) return;
-              saveScore(groupKey, rIdx, mIdx, inputs[0].value.trim(), inputs[1].value.trim(), card);
+              saveScore(info.group, m.id, inputs[0].value.trim(), inputs[1].value.trim(), div);
               inputs.forEach(i => { i.dataset.original = i.value; });
+              // Enable confirm if both scores entered
+              const confirmBtn = div.querySelector('.confirm-btn');
+              if (inputs[0].value && inputs[1].value) {
+                confirmBtn.disabled = false;
+                confirmBtn.className = confirmBtn.className.replace('bg-slate-800 text-slate-500 cursor-not-allowed', 'bg-green-600 hover:bg-green-500 text-white');
+              }
             };
             input.addEventListener('blur', save);
             input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); e.target.blur(); } });
           });
 
-          roundDiv.appendChild(card);
-        });
+          // Confirm button
+          div.querySelector('.confirm-btn').addEventListener('click', () => {
+            finaliseMatch(info.group, m.id).then(res => {
+              if (res.ok) location.reload();
+              else alert(res.error || 'Failed to finalise');
+            });
+          });
 
-        container.appendChild(roundDiv);
+          // Cancel/unassign button
+          div.querySelector('.cancel-btn').addEventListener('click', () => {
+            unassignMatch(info.group, m.id).then(res => {
+              if (res.ok) location.reload();
+              else alert(res.error || 'Failed to unassign');
+            });
+          });
+
+        } else {
+          div.className = 'bg-[#0d1625] border border-[#1e293b] rounded-2xl p-3 flex flex-col items-center justify-center min-h-[120px]';
+          div.innerHTML = `
+            <span class="text-xs font-bold text-slate-600 mb-1">Court ${courtNum}</span>
+            <span class="text-slate-700 text-xs">Free</span>`;
+        }
+
+        container.appendChild(div);
+      });
+    }
+
+    // ── Render queue ─────────────────────────────────────────────
+    function renderQueue() {
+      const container = document.getElementById('queue-list');
+      container.innerHTML = '<p class="text-xs text-slate-600 mb-3">Loading queue...</p>';
+
+      fetch('/api/queue').then(r => r.json()).then(res => {
+        container.innerHTML = '';
+        const queue = res.queue || [];
+        renderUmpires(queue);
+        if (queue.length === 0) {
+          container.innerHTML = '<p class="text-sm text-slate-600">No matches in queue — all pairs are on court or all matches complete.</p>';
+          return;
+        }
+
+        // Available courts
+        const usedCourts = new Set();
+        for (const gd of Object.values(DATA.groups)) {
+          for (const m of gd.matches) {
+            if (m.court && (m.status === 'in_progress' || m.status === 'scored')) usedCourts.add(m.court);
+          }
+        }
+        const freeCourts = (DATA.courts || []).filter(c => !usedCourts.has(c));
+
+        queue.forEach((item, idx) => {
+          const div = document.createElement('div');
+          div.className = 'match-card bg-[#0d1625] border border-[#1e293b] rounded-2xl p-3 mb-2';
+          const n1 = pairName(item.pair1);
+          const n2 = pairName(item.pair2);
+
+          let assignHtml = '';
+          if (freeCourts.length > 0) {
+            const opts = freeCourts.map(c => `<option value="${c}">Ct ${c}</option>`).join('');
+            assignHtml = `
+              <div class="flex items-center gap-2 mt-2">
+                <select class="court-select bg-[#0a0f1a] border border-[#1e293b] text-slate-300 text-xs rounded-lg px-2 py-1.5 outline-none">${opts}</select>
+                <button class="assign-btn text-xs font-semibold bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg transition-all">Assign</button>
+              </div>`;
+          }
+
+          div.innerHTML = `
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-slate-600 w-5">#${idx + 1}</span>
+              ${groupBadge(item.group)}
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-slate-200 flex-1 truncate">${n1}</span>
+              <span class="text-slate-600 text-xs">vs</span>
+              <span class="text-sm text-slate-200 flex-1 text-right truncate">${n2}</span>
+            </div>
+            ${assignHtml}`;
+
+          const assignBtn = div.querySelector('.assign-btn');
+          if (assignBtn) {
+            assignBtn.addEventListener('click', () => {
+              const court = parseInt(div.querySelector('.court-select').value);
+              assignMatch(item.group, item.match_id, court).then(res => {
+                if (res.ok) location.reload();
+                else alert(res.error || 'Failed to assign');
+              });
+            });
+          }
+
+          container.appendChild(div);
+        });
+      });
+    }
+
+    // ── Render completed ─────────────────────────────────────────
+    function renderCompleted() {
+      const container = document.getElementById('completed-list');
+      container.innerHTML = '';
+
+      const completed = [];
+      for (const [g, gd] of Object.entries(DATA.groups)) {
+        for (const m of gd.matches) {
+          if (m.status === 'finalised') {
+            completed.push({ group: g, match: m, pairs: gd.pairs });
+          }
+        }
+      }
+      completed.sort((a, b) => (b.match.seq || 0) - (a.match.seq || 0));
+
+      if (completed.length === 0) {
+        container.innerHTML = '<p class="text-sm text-slate-600">No completed matches yet.</p>';
+        return;
+      }
+
+      completed.forEach(item => {
+        const m = item.match;
+        const p1 = item.pairs[m.pair1];
+        const p2 = item.pairs[m.pair2];
+        const s1Won = m.score1 > m.score2;
+        const div = document.createElement('div');
+        div.className = 'bg-[#0d1625] border border-[#1e293b] rounded-xl p-2.5 mb-1.5';
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            ${groupBadge(item.group)}
+            <span class="text-sm ${s1Won ? 'text-slate-200 font-semibold' : 'text-slate-400'} flex-1 truncate">${pairName(p1)}</span>
+            <span class="text-sm font-mono font-bold ${s1Won ? 'text-green-400' : 'text-slate-400'}">${m.score1}</span>
+            <span class="text-slate-600">-</span>
+            <span class="text-sm font-mono font-bold ${!s1Won ? 'text-green-400' : 'text-slate-400'}">${m.score2}</span>
+            <span class="text-sm ${!s1Won ? 'text-slate-200 font-semibold' : 'text-slate-400'} flex-1 text-right truncate">${pairName(p2)}</span>
+          </div>`;
+        container.appendChild(div);
       });
     }
 
@@ -502,10 +643,8 @@
     // ── Finalise ─────────────────────────────────────────────────
     function allScoresComplete() {
       for (const gd of Object.values(DATA.groups)) {
-        for (const round of gd.rounds) {
-          for (const match of round) {
-            if (match.score1 === null || match.score2 === null) return false;
-          }
+        for (const match of gd.matches) {
+          if (match.status !== 'finalised' && match.status !== 'skipped') return false;
         }
       }
       return true;
@@ -668,10 +807,92 @@
       });
     });
 
+    // ── Umpire availability ─────────────────────────────────────
+    function renderUmpires(queueItems) {
+      const container = document.getElementById('umpire-list');
+      const UPCOMING_WINDOW = 3;
+
+      // Collect all players
+      const allPlayers = {};
+      for (const [g, gd] of Object.entries(DATA.groups)) {
+        for (const p of gd.pairs) {
+          for (const name of p.players) {
+            allPlayers[name] = { group: g, pairId: p.id, status: 'free' };
+          }
+        }
+      }
+
+      // Mark players on court
+      for (const [g, gd] of Object.entries(DATA.groups)) {
+        for (const m of gd.matches) {
+          if (m.status === 'in_progress' || m.status === 'scored') {
+            const p1 = gd.pairs[m.pair1];
+            const p2 = gd.pairs[m.pair2];
+            for (const name of [...p1.players, ...p2.players]) {
+              if (allPlayers[name]) allPlayers[name].status = 'on_court';
+            }
+          }
+        }
+      }
+
+      // Mark players in upcoming queue matches
+      const upcoming = (queueItems || []).slice(0, UPCOMING_WINDOW);
+      for (const item of upcoming) {
+        for (const name of [...item.pair1.players, ...item.pair2.players]) {
+          if (allPlayers[name] && allPlayers[name].status === 'free') {
+            allPlayers[name].status = 'up_next';
+          }
+        }
+      }
+
+      const free = Object.entries(allPlayers).filter(([_, p]) => p.status === 'free');
+      const upNext = Object.entries(allPlayers).filter(([_, p]) => p.status === 'up_next');
+
+      let html = '';
+
+      if (free.length > 0) {
+        html += '<div class="flex flex-wrap gap-1.5 mb-3">';
+        free.forEach(([name, p]) => {
+          const c = GROUP_COLORS[p.group] || GROUP_COLORS.A;
+          html += `<span class="text-xs font-medium ${c.bg} ${c.text} ${c.border} border px-2 py-1 rounded-lg">${esc(name)}</span>`;
+        });
+        html += '</div>';
+      } else {
+        html += '<p class="text-xs text-slate-600 mb-3">No players free right now.</p>';
+      }
+
+      if (upNext.length > 0) {
+        html += '<p class="text-[10px] uppercase tracking-wider text-slate-600 font-semibold mb-1.5">Playing soon (next ' + UPCOMING_WINDOW + ' matches)</p>';
+        html += '<div class="flex flex-wrap gap-1.5">';
+        upNext.forEach(([name, p]) => {
+          html += `<span class="text-xs text-slate-600 bg-slate-800/50 border border-slate-700/50 px-2 py-1 rounded-lg">${esc(name)}</span>`;
+        });
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ── Court config ────────────────────────────────────────────
+    document.getElementById('courtsInput').value = (DATA.courts || []).join(', ');
+    document.getElementById('courtsUpdateBtn').addEventListener('click', () => {
+      const input = document.getElementById('courtsInput').value;
+      const courts = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+      if (courts.length === 0) { alert('Enter at least one court number.'); return; }
+      fetch('/api/courts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courts })
+      }).then(r => r.json()).then(res => {
+        if (res.ok) location.reload();
+        else alert(res.error || 'Failed to update courts');
+      });
+    });
+
     // ── Init ─────────────────────────────────────────────────────
-    renderMatches('A', 'matches-A');
-    renderMatches('B', 'matches-B');
-    renderMatches('C', 'matches-C');
+    renderCourts();
+    renderQueue();
+    renderCompleted();
     renderTeams();
   </script>
 </body>
