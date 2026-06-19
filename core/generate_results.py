@@ -60,9 +60,8 @@ def _results_page_html(data, date_label):
         )
 
     total = sum(
-        len(rnd)
+        len(data["groups"][g]["matches"])
         for g in GROUP_ORDER if g in data["groups"]
-        for rnd in data["groups"][g]["rounds"]
     )
 
     return f"""<!DOCTYPE html>

@@ -27,26 +27,27 @@ def load_data():
 
 def calc_standings(group_data):
     pairs = group_data["pairs"]
-    rounds = group_data["rounds"]
+    matches = group_data["matches"]
     stats = {p["id"]: {"pair": p, "W": 0, "L": 0, "pts_for": 0, "pts_against": 0} for p in pairs}
 
-    for rnd in rounds:
-        for match in rnd:
-            s1 = match.get("score1")
-            s2 = match.get("score2")
-            if s1 is None or s2 is None:
-                continue
-            p1, p2 = match["pair1"], match["pair2"]
-            stats[p1]["pts_for"] += s1
-            stats[p1]["pts_against"] += s2
-            stats[p2]["pts_for"] += s2
-            stats[p2]["pts_against"] += s1
-            if s1 > s2:
-                stats[p1]["W"] += 1
-                stats[p2]["L"] += 1
-            elif s2 > s1:
-                stats[p2]["W"] += 1
-                stats[p1]["L"] += 1
+    for match in matches:
+        if match.get("status") != "finalised":
+            continue
+        s1 = match.get("score1")
+        s2 = match.get("score2")
+        if s1 is None or s2 is None:
+            continue
+        p1, p2 = match["pair1"], match["pair2"]
+        stats[p1]["pts_for"] += s1
+        stats[p1]["pts_against"] += s2
+        stats[p2]["pts_for"] += s2
+        stats[p2]["pts_against"] += s1
+        if s1 > s2:
+            stats[p1]["W"] += 1
+            stats[p2]["L"] += 1
+        elif s2 > s1:
+            stats[p2]["W"] += 1
+            stats[p1]["L"] += 1
 
     ranked = sorted(
         stats.values(),
@@ -61,12 +62,12 @@ def calc_standings(group_data):
     return ranked
 
 
-def find_current_round(rounds):
-    for i, rnd in enumerate(rounds):
-        for match in rnd:
-            if match.get("score1") is None or match.get("score2") is None:
-                return i
-    return None  # all rounds complete
+def is_tournament_complete(data):
+    for gd in data["groups"].values():
+        for m in gd["matches"]:
+            if m.get("status") not in ("finalised", "skipped"):
+                return True
+    return False
 
 
 def pair_display(pair_obj):
@@ -118,18 +119,19 @@ def standings_table(standings, group_data, accent, complete=False):
 
 def match_grid(group_data, standings, accent):
     pairs = group_data["pairs"]
-    rounds = group_data["rounds"]
+    matches = group_data["matches"]
     n = len(pairs)
     if n < 2:
         return ""
 
     scores = {}
-    for rnd in rounds:
-        for match in rnd:
-            p1, p2 = match["pair1"], match["pair2"]
-            s1, s2 = match.get("score1"), match.get("score2")
-            scores[(p1, p2)] = (s1, s2)
-            scores[(p2, p1)] = (s2, s1)
+    for match in matches:
+        if match.get("status") != "finalised":
+            continue
+        p1, p2 = match["pair1"], match["pair2"]
+        s1, s2 = match.get("score1"), match.get("score2")
+        scores[(p1, p2)] = (s1, s2)
+        scores[(p2, p1)] = (s2, s1)
 
     ordered = [s["pair"] for s in standings]
 
@@ -167,57 +169,86 @@ def match_grid(group_data, standings, accent):
     </div>"""
 
 
-def rounds_section(group_data, current_round_idx, accent):
+def live_matches_section(group_data, accent):
+    """Render Now Playing and Up Next for a group."""
     pairs = {p["id"]: p for p in group_data["pairs"]}
-    rounds = group_data["rounds"]
+    matches = group_data["matches"]
     accent_map = {
         "green": "text-green-400 bg-green-950/60 border-green-900/50",
         "blue":  "text-blue-400 bg-blue-950/60 border-blue-900/50",
         "amber": "text-amber-400 bg-amber-950/60 border-amber-900/50",
     }
     a_badge = accent_map.get(accent, accent_map["green"])
-    html = ""
-    for r_idx, rnd in enumerate(rounds):
-        is_current = current_round_idx is not None and r_idx == current_round_idx
-        all_done = all(m.get("score1") is not None and m.get("score2") is not None for m in rnd)
 
-        if is_current:
-            badge = f'<span class="{a_badge} border text-xs font-semibold px-2 py-0.5 rounded-full ml-2">Live</span>'
-            hdr = f'<span class="font-bold text-slate-200">Round {r_idx + 1}</span>{badge}'
-        elif all_done:
-            hdr = f'<span class="font-semibold text-slate-600">Round {r_idx + 1}</span><span class="text-xs text-slate-700 ml-2">Complete</span>'
-        else:
-            hdr = f'<span class="font-semibold text-slate-500">Round {r_idx + 1}</span>'
+    def match_row(match, show_court=False):
+        p1 = pairs[match["pair1"]]
+        p2 = pairs[match["pair2"]]
+        n1 = f"{esc(p1['players'][0])} & {esc(p1['players'][1])}"
+        n2 = f"{esc(p2['players'][0])} & {esc(p2['players'][1])}"
+        s1, s2 = match.get("score1"), match.get("score2")
 
-        match_rows = ""
-        for match in rnd:
-            p1 = pairs[match["pair1"]]
-            p2 = pairs[match["pair2"]]
-            n1 = f"{esc(p1['players'][0])} & {esc(p1['players'][1])}"
-            n2 = f"{esc(p2['players'][0])} & {esc(p2['players'][1])}"
-            s1, s2 = match.get("score1"), match.get("score2")
-
-            if s1 is not None and s2 is not None:
-                if s1 > s2:
-                    score_html = f'<span class="font-bold text-green-400">{s1}</span><span class="text-slate-600 mx-1">–</span><span class="text-slate-400">{s2}</span>'
-                else:
-                    score_html = f'<span class="text-slate-400">{s1}</span><span class="text-slate-600 mx-1">–</span><span class="font-bold text-green-400">{s2}</span>'
+        if s1 is not None and s2 is not None:
+            if s1 > s2:
+                score_html = f'<span class="font-bold text-green-400">{s1}</span><span class="text-slate-600 mx-1">-</span><span class="text-slate-400">{s2}</span>'
             else:
-                score_html = '<span class="text-slate-700 text-xs">TBD</span>'
+                score_html = f'<span class="text-slate-400">{s1}</span><span class="text-slate-600 mx-1">-</span><span class="font-bold text-green-400">{s2}</span>'
+        else:
+            score_html = '<span class="text-slate-700 text-xs">TBD</span>'
 
-            live_bg = "bg-white/[0.03] border border-white/10" if is_current and s1 is None else "bg-transparent border border-transparent"
-            match_rows += f"""
-            <div class="flex items-center {live_bg} rounded-xl px-3 py-2 mb-1">
+        court_label = ""
+        if show_court and match.get("court"):
+            court_label = f'<span class="text-[10px] {a_badge} border px-1.5 py-0.5 rounded-full mr-2">Ct {match["court"]}</span>'
+
+        return f"""
+            <div class="flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 mb-1">
+              {court_label}
               <span class="text-slate-300 text-sm flex-1 truncate">{n1}</span>
               <span class="mx-3 text-sm font-mono shrink-0">{score_html}</span>
               <span class="text-slate-300 text-sm flex-1 text-right truncate">{n2}</span>
             </div>"""
 
+    # Now Playing
+    in_progress = [m for m in matches if m["status"] in ("in_progress", "scored")]
+    in_progress.sort(key=lambda m: m.get("court") or 0)
+
+    # Up Next: pending matches where neither pair is busy
+    busy_pairs = set()
+    for m in matches:
+        if m["status"] in ("in_progress", "scored"):
+            busy_pairs.add(m["pair1"])
+            busy_pairs.add(m["pair2"])
+
+    up_next = [m for m in matches if m["status"] == "pending"
+               and m["pair1"] not in busy_pairs and m["pair2"] not in busy_pairs][:3]
+
+    html = ""
+    if in_progress:
+        rows = "".join(match_row(m, show_court=True) for m in in_progress)
         html += f"""
         <div class="mb-4">
-          <div class="text-xs mb-2 px-1">{hdr}</div>
-          {match_rows}
+          <div class="text-xs mb-2 px-1">
+            <span class="font-bold text-slate-200">Now Playing</span>
+            <span class="{a_badge} border text-xs font-semibold px-2 py-0.5 rounded-full ml-2">Live</span>
+          </div>
+          {rows}
         </div>"""
+
+    if up_next:
+        rows = "".join(match_row(m) for m in up_next)
+        html += f"""
+        <div class="mb-4">
+          <div class="text-xs mb-2 px-1"><span class="font-semibold text-slate-500">Up Next</span></div>
+          {rows}
+        </div>"""
+
+    # Progress
+    total = len(matches)
+    done = sum(1 for m in matches if m["status"] in ("finalised", "skipped"))
+    if total > 0:
+        pct = int(done / total * 100)
+        html += f"""
+        <div class="text-xs text-slate-600 px-1">{done}/{total} matches complete ({pct}%)</div>"""
+
     return html
 
 
@@ -236,19 +267,20 @@ def calc_team_standings(teams, groups_data):
     diffs = [0] * len(teams)
 
     for g in ["A", "B", "C"]:
-        for rnd in groups_data[g]["rounds"]:
-            for match in rnd:
-                s1, s2 = match.get("score1"), match.get("score2")
-                if s1 is None or s2 is None:
-                    continue
-                t1 = pair_to_team.get((g, match["pair1"]))
-                t2 = pair_to_team.get((g, match["pair2"]))
-                if t1 is not None:
-                    wins[t1]  += 1 if s1 > s2 else 0
-                    diffs[t1] += s1 - s2
-                if t2 is not None:
-                    wins[t2]  += 1 if s2 > s1 else 0
-                    diffs[t2] += s2 - s1
+        for match in groups_data[g]["matches"]:
+            if match.get("status") != "finalised":
+                continue
+            s1, s2 = match.get("score1"), match.get("score2")
+            if s1 is None or s2 is None:
+                continue
+            t1 = pair_to_team.get((g, match["pair1"]))
+            t2 = pair_to_team.get((g, match["pair2"]))
+            if t1 is not None:
+                wins[t1]  += 1 if s1 > s2 else 0
+                diffs[t1] += s1 - s2
+            if t2 is not None:
+                wins[t2]  += 1 if s2 > s1 else 0
+                diffs[t2] += s2 - s1
 
     team_stats = [{"team": t, "wins": wins[i], "diff": diffs[i]} for i, t in enumerate(teams)]
     team_stats.sort(key=lambda x: (-x["wins"], -x["diff"]))
@@ -314,11 +346,12 @@ def teams_grid(teams, groups_data):
 
 def group_section(group_key, gd, accent):
     standings = calc_standings(gd)
-    current_round = find_current_round(gd["rounds"])
-    complete = current_round is None
+    total = len(gd["matches"])
+    done = sum(1 for m in gd["matches"] if m["status"] in ("finalised", "skipped"))
+    complete = total > 0 and done == total
     st_rows = standings_table(standings, gd, accent, complete=complete)
     grid = match_grid(gd, standings, accent)
-    rounds_html = rounds_section(gd, current_round, accent)
+    live_html = live_matches_section(gd, accent)
 
     accent_styles = {
         "green": ("from-green-900/40 to-transparent", "text-green-400", "border-green-900/30"),
@@ -368,12 +401,12 @@ def group_section(group_key, gd, accent):
           <div class="p-3">{grid}</div>
         </div>
 
-        <!-- Schedule -->
+        <!-- Live Matches -->
         <div class="bg-white/[0.03] border {a_border} rounded-2xl overflow-hidden">
           <div class="px-4 py-2.5 border-b border-white/5">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Schedule</span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Matches</span>
           </div>
-          <div class="p-3">{rounds_html}</div>
+          <div class="p-3">{live_html}</div>
         </div>
       </section>"""
 
@@ -393,23 +426,17 @@ def generate_index():
     teams = data.get("teams", [])
     published_at = datetime.now().strftime("%H:%M · %a %d %b")
 
-    all_complete = all(
-        find_current_round(data["groups"][g]["rounds"]) is None
+    total_matches = sum(
+        len(data["groups"][g]["matches"])
         for g in GROUP_ORDER if g in data["groups"]
-    )
-
-    total_matches  = sum(
-        len(rnd)
-        for g in GROUP_ORDER if g in data["groups"]
-        for rnd in data["groups"][g]["rounds"]
     )
     played_matches = sum(
         1
         for g in GROUP_ORDER if g in data["groups"]
-        for rnd in data["groups"][g]["rounds"]
-        for m in rnd
-        if m.get("score1") is not None and m.get("score2") is not None
+        for m in data["groups"][g]["matches"]
+        if m.get("status") in ("finalised", "skipped")
     )
+    all_complete = total_matches > 0 and played_matches == total_matches
     pct = round(played_matches / total_matches * 100) if total_matches else 0
 
     auto_refresh_js = "" if all_complete else (
