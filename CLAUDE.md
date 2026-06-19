@@ -30,7 +30,7 @@ A local Flask tournament manager for a weekly badminton social. Admin runs it on
 | `todo.md` | Planned features — check here before adding anything new |
 
 ## Ratings scale
-`A+  A  A-  B+  B  B-  C+  C  C-` (best to worst, defined in `SKILL_ORDER`)
+`1` (best) to `9` (beginner), defined in `SKILL_ORDER`
 
 ## Ranking logic
 - Standings: wins → point differential → points scored

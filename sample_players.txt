@@ -1,37 +1,37 @@
 # Sample players for Supersmash Saturdays
 # Format: Name : Skill Rating : Gender (gender is optional — omit if unspecified)
-# Ratings: A+, A, A-, B+, B, B-, C+, C, C-
+# Ratings: 1 (best) to 9 (beginner)
 # Gender:  M or F
 
-Marcus Chen : A+ : M
-Priya Sharma : A+ : F
-James Okafor : A : M
-Yuki Tanaka : A : F
-Sofia Reyes : A : F
-Daniel Park : A- : M
-Aisha Mwangi : A- : F
-Liam Novak : A- : M
-Zara Ahmed : A- : F
-Ryan Kowalski : A- : M
+Marcus Chen : 1 : M
+Priya Sharma : 1 : F
+James Okafor : 2 : M
+Yuki Tanaka : 2 : F
+Sofia Reyes : 2 : F
+Daniel Park : 3 : M
+Aisha Mwangi : 3 : F
+Liam Novak : 3 : M
+Zara Ahmed : 3 : F
+Ryan Kowalski : 3 : M
 
-Noah Patel : B+ : M
-Emma Johansson : B+ : F
-Carlos Diaz : B+ : M
-Mei Lin : B : F
-Trevor Wilson : B : M
-Fatima Hassan : B : F
-Ben Nakamura : B : M
-Ava Christensen : B- : F
-Louis Bernard : B- : M
-Isabelle Dubois : B- : F
+Noah Patel : 4 : M
+Emma Johansson : 4 : F
+Carlos Diaz : 4 : M
+Mei Lin : 5 : F
+Trevor Wilson : 5 : M
+Fatima Hassan : 5 : F
+Ben Nakamura : 5 : M
+Ava Christensen : 6 : F
+Louis Bernard : 6 : M
+Isabelle Dubois : 6 : F
 
-Grace Osei : C+ : F
-Kevin Tran : C+ : M
-Olivia Murphy : C+ : F
-Sam Fletcher : C : M
-Jade Morrison : C : F
-Raj Kapoor : C : M
-Amara Diallo : C : F
-Tom Hughes : C- : M
-Leila Nkosi : C- : F
-Chris Yamamoto : C- : M
+Grace Osei : 7 : F
+Kevin Tran : 7 : M
+Olivia Murphy : 7 : F
+Sam Fletcher : 8 : M
+Jade Morrison : 8 : F
+Raj Kapoor : 8 : M
+Amara Diallo : 8 : F
+Tom Hughes : 9 : M
+Leila Nkosi : 9 : F
+Chris Yamamoto : 9 : M
