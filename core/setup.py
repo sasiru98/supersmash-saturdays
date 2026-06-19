@@ -314,7 +314,7 @@ def display_teams(teams):
 
 def edit_teams(teams):
     while True:
-        print("\nOptions: [c]ontinue, [n]ame a team")
+        print("\nOptions: [c]ontinue, [n]ame a team, [s]wap pairs between teams")
         choice = input("  > ").strip().lower()
         if choice == "c":
             break
@@ -327,6 +327,25 @@ def edit_teams(teams):
                     display_teams(teams)
                 else:
                     print("  Invalid team number.")
+            except ValueError:
+                print("  Invalid input.")
+        elif choice == "s":
+            try:
+                g = input("  Group to swap (A=Advanced, B=Intermediate, C=Beginner): ").strip().upper()
+                if g not in ("A", "B", "C"):
+                    print("  Invalid group. Enter A, B, or C.")
+                    continue
+                t1 = int(input("  First team number: ")) - 1
+                t2 = int(input("  Second team number: ")) - 1
+                if not (0 <= t1 < len(teams) and 0 <= t2 < len(teams)):
+                    print("  Invalid team number.")
+                    continue
+                if t1 == t2:
+                    print("  Same team — nothing to swap.")
+                    continue
+                teams[t1][g], teams[t2][g] = teams[t2][g], teams[t1][g]
+                print(f"  Swapped {GROUP_NAMES[g]} pairs between {teams[t1]['name']} and {teams[t2]['name']}.")
+                display_teams(teams)
             except ValueError:
                 print("  Invalid input.")
         else:
