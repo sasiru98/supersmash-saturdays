@@ -20,6 +20,8 @@ BAK_SESSION      = os.path.join(_BACKUP_DIR, "tournament.session.bak")
 BAK_PRE_REGEN    = os.path.join(_BACKUP_DIR, "tournament.pre-regen.bak")
 _data_lock       = threading.Lock()
 app = Flask(__name__, template_folder=os.path.join(_REPO_ROOT, "templates"))
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.jinja_env.auto_reload = True
 
 
 def get_pages_url():
@@ -114,35 +116,209 @@ def api_data():
     return jsonify(data)
 
 
+def _find_match(data, group, match_id):
+    """Find a match by group key and match ID. Returns (match, error_response)."""
+    if group not in data["groups"]:
+        return None, (jsonify({"error": f"Unknown group '{group}'"}), 400)
+    for m in data["groups"][group]["matches"]:
+        if m["id"] == match_id:
+            return m, None
+    return None, (jsonify({"error": f"Match {match_id} not found in group {group}"}), 404)
+
+
+def _parse_score(val):
+    if val is None or val == "":
+        return None
+    n = int(val)
+    if not (0 <= n <= 99):
+        raise ValueError(f"Score {n} out of range (0-99)")
+    return n
+
+
 @app.route("/api/score", methods=["POST"])
 def api_score():
     body = request.json
     group = body.get("group")
-    round_idx = body.get("round")
-    match_idx = body.get("match")
+    match_id = body.get("match_id")
     score1 = body.get("score1")
     score2 = body.get("score2")
-
-    def parse_score(val):
-        if val is None or val == "":
-            return None
-        n = int(val)
-        if not (0 <= n <= 99):
-            raise ValueError(f"Score {n} out of range (0–99)")
-        return n
 
     with _data_lock:
         data = load_data()
         if data is None:
             return jsonify({"error": "No data"}), 500
         try:
-            match = data["groups"][group]["rounds"][round_idx][match_idx]
-            match["score1"] = parse_score(score1)
-            match["score2"] = parse_score(score2)
+            match, err = _find_match(data, group, match_id)
+            if err:
+                return err
+            if match["status"] not in ("in_progress", "scored"):
+                return jsonify({"error": f"Cannot score a {match['status']} match"}), 400
+            match["score1"] = _parse_score(score1)
+            match["score2"] = _parse_score(score2)
+            if match["score1"] is not None and match["score2"] is not None:
+                match["status"] = "scored"
             save_data(data)
             return jsonify({"ok": True})
-        except (KeyError, IndexError, TypeError, ValueError) as e:
+        except (KeyError, TypeError, ValueError) as e:
             return jsonify({"error": str(e)}), 400
+
+
+@app.route("/api/courts", methods=["POST"])
+def api_courts():
+    body = request.json
+    courts = body.get("courts")
+    if not isinstance(courts, list) or not all(isinstance(c, int) for c in courts):
+        return jsonify({"error": "courts must be a list of integers"}), 400
+
+    with _data_lock:
+        data = load_data()
+        if data is None:
+            return jsonify({"error": "No data"}), 500
+        data["courts"] = sorted(courts)
+        save_data(data)
+        return jsonify({"ok": True, "courts": data["courts"]})
+
+
+@app.route("/api/assign", methods=["POST"])
+def api_assign():
+    body = request.json
+    group = body.get("group")
+    match_id = body.get("match_id")
+    court = body.get("court")
+
+    with _data_lock:
+        data = load_data()
+        if data is None:
+            return jsonify({"error": "No data"}), 500
+
+        if court not in data.get("courts", []):
+            return jsonify({"error": f"Court {court} is not configured"}), 400
+
+        match, err = _find_match(data, group, match_id)
+        if err:
+            return err
+        if match["status"] != "pending":
+            return jsonify({"error": f"Match is {match['status']}, not pending"}), 400
+
+        # Check court is free
+        for gd in data["groups"].values():
+            for m in gd["matches"]:
+                if m["court"] == court and m["status"] in ("in_progress", "scored"):
+                    return jsonify({"error": f"Court {court} is occupied"}), 400
+
+        # Check neither pair is currently playing
+        for m in data["groups"][group]["matches"]:
+            if m["status"] in ("in_progress", "scored"):
+                if m["pair1"] in (match["pair1"], match["pair2"]) or \
+                   m["pair2"] in (match["pair1"], match["pair2"]):
+                    return jsonify({"error": "One of the pairs is already on court"}), 400
+
+        match["status"] = "in_progress"
+        match["court"] = court
+        save_data(data)
+        return jsonify({"ok": True})
+
+
+@app.route("/api/unassign", methods=["POST"])
+def api_unassign():
+    body = request.json
+    group = body.get("group")
+    match_id = body.get("match_id")
+
+    with _data_lock:
+        data = load_data()
+        if data is None:
+            return jsonify({"error": "No data"}), 500
+
+        match, err = _find_match(data, group, match_id)
+        if err:
+            return err
+        if match["status"] not in ("in_progress", "scored"):
+            return jsonify({"error": f"Match is {match['status']}, cannot unassign"}), 400
+
+        match["status"] = "pending"
+        match["court"] = None
+        match["score1"] = None
+        match["score2"] = None
+        save_data(data)
+        return jsonify({"ok": True})
+
+
+@app.route("/api/finalise_match", methods=["POST"])
+def api_finalise_match():
+    body = request.json
+    group = body.get("group")
+    match_id = body.get("match_id")
+
+    with _data_lock:
+        data = load_data()
+        if data is None:
+            return jsonify({"error": "No data"}), 500
+
+        match, err = _find_match(data, group, match_id)
+        if err:
+            return err
+        if match["status"] != "scored":
+            return jsonify({"error": "Match must be scored before finalising"}), 400
+        if match["score1"] is None or match["score2"] is None:
+            return jsonify({"error": "Both scores must be entered"}), 400
+
+        match["status"] = "finalised"
+        match["seq"] = data.get("next_seq", 1)
+        data["next_seq"] = match["seq"] + 1
+        match["court"] = None
+        save_data(data)
+        return jsonify({"ok": True})
+
+
+@app.route("/api/queue")
+def api_queue():
+    data = load_data()
+    if data is None:
+        return jsonify({"error": "No data"}), 500
+
+    queue = []
+    for g, gd in data["groups"].items():
+        pairs = {p["id"]: p for p in gd["pairs"]}
+
+        # Per-pair stats: matches played and last sequence number
+        pair_played = {}
+        pair_last_seq = {}
+        busy_pairs = set()
+        for m in gd["matches"]:
+            for pid in (m["pair1"], m["pair2"]):
+                pair_played.setdefault(pid, 0)
+                pair_last_seq.setdefault(pid, 0)
+            if m["status"] in ("finalised", "scored", "in_progress"):
+                pair_played[m["pair1"]] = pair_played.get(m["pair1"], 0) + 1
+                pair_played[m["pair2"]] = pair_played.get(m["pair2"], 0) + 1
+            if m["status"] == "finalised" and m["seq"]:
+                pair_last_seq[m["pair1"]] = max(pair_last_seq.get(m["pair1"], 0), m["seq"])
+                pair_last_seq[m["pair2"]] = max(pair_last_seq.get(m["pair2"], 0), m["seq"])
+            if m["status"] in ("in_progress", "scored"):
+                busy_pairs.add(m["pair1"])
+                busy_pairs.add(m["pair2"])
+
+        for m in gd["matches"]:
+            if m["status"] != "pending":
+                continue
+            if m["pair1"] in busy_pairs or m["pair2"] in busy_pairs:
+                continue
+            p1_played = pair_played.get(m["pair1"], 0)
+            p2_played = pair_played.get(m["pair2"], 0)
+            p1_seq = pair_last_seq.get(m["pair1"], 0)
+            p2_seq = pair_last_seq.get(m["pair2"], 0)
+            queue.append({
+                "group": g,
+                "match_id": m["id"],
+                "pair1": pairs[m["pair1"]],
+                "pair2": pairs[m["pair2"]],
+                "priority_played": max(p1_played, p2_played),
+                "priority_seq": max(p1_seq, p2_seq),
+            })
+
+    queue.sort(key=lambda x: (x["priority_played"], x["priority_seq"]))
+    return jsonify({"queue": queue})
 
 
 @app.route("/api/team_name", methods=["POST"])
