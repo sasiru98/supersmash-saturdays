@@ -1,35 +1,41 @@
 # Advanced
-Rahul : A+ : M
-Priya : A+ : F
-Arjun : A+ : M
-Dev : A : M
-Mei : A : F
-Tanvir : A : M
-Rohan : A- : M
-Nikhil : A- : M
-Siddharth : A- : M
-Chris : A- : M
+Dhruv : 1
+Vishaal : 1
+Voody : 1
+Don : 1
+Gautham : 2
+Nishant : 2
+Vishal : 2
+Nik : 2
+Wael : 3
+Abdul : 3
+Vinayak : 3
+Ritwik : 3
 
 # Intermediate
-Anika : B+ : F
-Vikram : B+ : M
-Harish : B+ : M
-Raj : B+ : M
-Karan : B : M
-Sarah : B : F
-Ravi : B : M
-Lakshmi : B : F
-James : B- : M
-Lucas : B- : M
+Sai : 4
+Hari : 4
+Reyrey : 4
+Will : 4
+Joel : 5
+Daniyal : 5
+Ryan : 5
+Dheeraj : 5
+Praneeth : 6
+Prashanth ML : 6
+Sohan KE2 : 6
+Nick : 6
 
 # Beginner
-Sam : C+ : M
-Nathan : C+ : M
-Pita : C+ : F
-Jason : C : M
-Yuki : C : F
-Jake : C : M
-Ananya : C : F
-Tyler : C- : M
-Marcus : C- : M
-Vin : C- : M
+Minu : 7
+Rohit : 7
+Nancy : 8
+Inson KE : 8
+Yuhang : 8
+Oj : 8
+Dhiv : 8
+Darshan : 8
+AC : 8
+Adwait : 8
+Sachin : 9
+Cindy : 9
