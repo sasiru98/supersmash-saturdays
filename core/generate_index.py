@@ -6,6 +6,8 @@ import os
 from datetime import datetime
 from html import escape as esc
 
+from constants import GROUP_NAMES
+
 _REPO_ROOT  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE   = os.path.join(_REPO_ROOT, "tournament.json")
 OUTPUT_FILE = os.path.join(_REPO_ROOT, "index.html")
@@ -302,9 +304,9 @@ def teams_grid(teams, groups_data):
             </div>
           </div>
           <div class="space-y-2">
-            {pair_row("Group A", "bg-green-950/70 text-green-400 border border-green-900/40", t["A"])}
-            {pair_row("Group B", "bg-blue-950/70 text-blue-400 border border-blue-900/40",   t["B"])}
-            {pair_row("Group C", "bg-amber-950/70 text-amber-400 border border-amber-900/40", t["C"])}
+            {pair_row("Advanced",     "bg-green-950/70 text-green-400 border border-green-900/40", t["A"])}
+            {pair_row("Intermediate","bg-blue-950/70 text-blue-400 border border-blue-900/40",   t["B"])}
+            {pair_row("Beginner",    "bg-amber-950/70 text-amber-400 border border-amber-900/40", t["C"])}
           </div>
         </div>"""
     return cards
@@ -330,7 +332,7 @@ def group_section(group_key, gd, accent):
         <!-- Section header -->
         <div class="flex items-center gap-3 mb-4">
           <div class="h-px flex-1 bg-gradient-to-r {grad}"></div>
-          <h2 class="text-sm font-bold uppercase tracking-[0.15em] {a_text}">Group {esc(group_key)}</h2>
+          <h2 class="text-sm font-bold uppercase tracking-[0.15em] {a_text}">{esc(GROUP_NAMES[group_key])}</h2>
           <div class="h-px flex-1 bg-gradient-to-l {grad}"></div>
         </div>
 
@@ -378,12 +380,12 @@ def group_section(group_key, gd, accent):
 
 TAB_CONFIG = [
     ("teams", "Teams"),
-    ("group-a", "Group A"),
-    ("group-b", "Group B"),
-    ("group-c", "Group C"),
+    ("advanced",     "Advanced"),
+    ("intermediate", "Intermediate"),
+    ("beginner",     "Beginner"),
 ]
 
-GROUP_TAB = {"A": "group-a", "B": "group-b", "C": "group-c"}
+GROUP_TAB = {"A": "advanced", "B": "intermediate", "C": "beginner"}
 
 
 def generate_index():
