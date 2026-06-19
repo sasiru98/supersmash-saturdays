@@ -1,41 +1,35 @@
 # Advanced
-Tharindu : A+
-Roshen : A+
-Sachintha : A+
-Aditya : A+
-Gautam : A
-Nishant : A
-Stevi : A
-Reyrey : A-
-Som : A-
-SP : A-
-Stephen : A-
-Helder : A-
+Rahul : A+ : M
+Priya : A+ : F
+Arjun : A+ : M
+Dev : A : M
+Mei : A : F
+Tanvir : A : M
+Rohan : A- : M
+Nikhil : A- : M
+Siddharth : A- : M
+Chris : A- : M
 
 # Intermediate
-Rodney : B+
-Prasad : B+
-Yoko : B+
-Bhav : B+
-Aunch : B+
-Vishal N : B
-Dhruv : B
-Anant : B
-Sidhaika : B
-Daniel : B
-Dhiv : B
-GC : B
+Anika : B+ : F
+Vikram : B+ : M
+Harish : B+ : M
+Raj : B+ : M
+Karan : B : M
+Sarah : B : F
+Ravi : B : M
+Lakshmi : B : F
+James : B- : M
+Lucas : B- : M
 
 # Beginner
-Hari : B
-Nancy : B-
-Inson : B-
-Malhar : B-
-Vicky : B-
-Pav : B-
-Akhilesh : C+
-Abhi : C+
-Nik : C+
-Vibhu : C
-Cindy : C-
-Khin : C-
+Sam : C+ : M
+Nathan : C+ : M
+Pita : C+ : F
+Jason : C : M
+Yuki : C : F
+Jake : C : M
+Ananya : C : F
+Tyler : C- : M
+Marcus : C- : M
+Vin : C- : M

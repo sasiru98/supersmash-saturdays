@@ -13,7 +13,7 @@ Round-robin tournament manager for Supersmash Saturdays badminton events. Player
 ## How it works
 
 - Players are sorted by skill rating and split evenly into three equal groups
-- Public-facing group names are **☀️ Sun / 🌙 Moon / ⭐ Stars** — no skill labels shown to players
+- Public-facing group names are **Group A / Group B / Group C**
 - Admin panel uses **Advanced / Intermediate / Beginner** internally
 - Pairs are formed within each group with mixed-gender pairs prioritised; falls back to top-to-bottom (1st with last) when gender isn't specified or the split is uneven
 - Each group runs its own full round-robin (every pair plays every other pair once)
@@ -110,7 +110,7 @@ The server prints the address on startup.
   Enter scores as matches finish. Scores auto-save on blur or Enter.
 
 - **Player phones** → https://sasiru98.github.io/supersmash-saturdays
-  Live standings, results grid, and schedule. Tabbed layout: **Teams / ☀️ Sun / 🌙 Moon / ⭐ Stars**. Sharing a link with `#sun` / `#moon` / `#stars` in the URL opens that tab directly.
+  Live standings, results grid, and schedule. Tabbed layout: **Teams / Group A / Group B / Group C**. Sharing a link with `#group-a` / `#group-b` / `#group-c` in the URL opens that tab directly.
 
 - **Publish button** → Recalculates all standings, commits to `dev`, merges to `main`, pushes to GitHub Pages.
 

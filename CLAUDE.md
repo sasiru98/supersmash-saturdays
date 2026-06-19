@@ -14,7 +14,7 @@ A local Flask tournament manager for a weekly badminton social. Admin runs it on
 
 ## Key conventions
 - **Never store derived data** in `tournament.json` — only raw scores and structure. Recalculate everything in `generate_index.py` on publish.
-- **Group keys are always `A`, `B`, `C`** internally (Advanced/Intermediate/Beginner). Public-facing names are `☀️ Sun / 🌙 Moon / ⭐ Stars` — set in `GROUP_PUBLIC` in `generate_index.py`. Admin always shows internal names.
+- **Group keys are always `A`, `B`, `C`** internally (Advanced/Intermediate/Beginner). Public-facing names are `Group A / Group B / Group C` — set in `GROUP_PUBLIC` in `generate_index.py`. Admin always shows internal names.
 - **Equal-size groups** — players sorted by rating, split evenly into thirds. Rating letters (A/B/C) are for sorting only, not for group assignment.
 - **`players.txt` is the group editor** — after setup it has `# Advanced / # Intermediate / # Beginner` section headers. Moving a player between sections and restarting `app.py` triggers a regeneration prompt.
 - **Git flow** — work on `dev`, publish merges to `main` and pushes both. `main` is always clean for GitHub Pages.
