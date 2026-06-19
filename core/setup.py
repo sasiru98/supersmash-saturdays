@@ -352,32 +352,22 @@ def edit_teams(teams):
             print("  Unknown option.")
 
 
-def make_schedule(pairs):
-    """Generate full round-robin schedule for a list of pairs."""
+def make_matchups(pairs):
+    """Generate flat list of all round-robin matchups (no round structure)."""
+    matchups = []
     pair_ids = list(range(len(pairs)))
-    matchups = list(combinations(pair_ids, 2))
-    rounds = []
-    scheduled = set()
-    pair_busy = set()
-
-    round_matches = []
-    remaining = list(matchups)
-
-    while remaining:
-        round_matches = []
-        pair_busy = set()
-        next_remaining = []
-        for m in remaining:
-            if m[0] not in pair_busy and m[1] not in pair_busy:
-                round_matches.append({"pair1": m[0], "pair2": m[1], "score1": None, "score2": None})
-                pair_busy.add(m[0])
-                pair_busy.add(m[1])
-            else:
-                next_remaining.append(m)
-        rounds.append(round_matches)
-        remaining = next_remaining
-
-    return rounds
+    for i, (p1, p2) in enumerate(combinations(pair_ids, 2)):
+        matchups.append({
+            "id": i,
+            "pair1": p1,
+            "pair2": p2,
+            "score1": None,
+            "score2": None,
+            "status": "pending",
+            "court": None,
+            "seq": None,
+        })
+    return matchups
 
 
 def get_pair_team(pair_players, teams, group):
@@ -387,8 +377,13 @@ def get_pair_team(pair_players, teams, group):
     return None
 
 
-def build_tournament_data(groups, all_pairs, teams):
+DEFAULT_COURTS = [1, 3, 5, 7, 9, 11, 13, 15]
+
+
+def build_tournament_data(groups, all_pairs, teams, courts=None):
     data = {
+        "courts": courts or DEFAULT_COURTS,
+        "next_seq": 1,
         "groups": {},
         "teams": teams,
     }
@@ -402,11 +397,11 @@ def build_tournament_data(groups, all_pairs, teams):
                 "players": p,
                 "team": team_name,
             })
-        schedule = make_schedule(pairs)
+        matches = make_matchups(pairs)
         data["groups"][g] = {
             "label": label,
             "pairs": pair_objects,
-            "rounds": schedule,
+            "matches": matches,
         }
     return data
 
@@ -484,8 +479,19 @@ def main():
     print("\nReview the cross-skill teams above.")
     edit_teams(teams)
 
-    # Step 4: Build and save tournament data
-    data = build_tournament_data(groups, all_pairs, teams)
+    # Step 4: Configure courts
+    print("\n--- COURTS ---")
+    default_str = ",".join(str(c) for c in DEFAULT_COURTS)
+    courts_input = input(f"  Court numbers (comma-separated, default {default_str}): ").strip()
+    if courts_input:
+        courts = [int(c.strip()) for c in courts_input.split(",") if c.strip().isdigit()]
+        courts.sort()
+    else:
+        courts = list(DEFAULT_COURTS)
+    print(f"  Using {len(courts)} courts: {courts}")
+
+    # Step 5: Build and save tournament data
+    data = build_tournament_data(groups, all_pairs, teams, courts)
     save_data(data)
 
     # Step 5: Generate and push initial index.html
