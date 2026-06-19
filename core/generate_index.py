@@ -280,7 +280,7 @@ def teams_grid(teams, groups_data):
         medal = f'<span class="ml-1">{medals[rank]}</span>' if rank in medals else ""
         return f"""
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wider {group_style} px-2 py-0.5 rounded-md w-[78px] text-center shrink-0">{group_label}</span>
+              <span class="text-[10px] font-semibold uppercase tracking-wider {group_style} px-2 py-0.5 rounded-md w-[100px] text-center shrink-0">{group_label}</span>
               <span class="text-xs text-slate-300">{esc(players[0])} &amp; {esc(players[1])}{medal}</span>
             </div>"""
 
