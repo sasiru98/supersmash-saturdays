@@ -3,7 +3,7 @@ Dhruv : 1
 Vishaal : 1
 Voody : 1
 Don : 1
-Gautham : 2
+Gautam : 2
 Nishant : 2
 Vishal : 2
 Nik : 2
