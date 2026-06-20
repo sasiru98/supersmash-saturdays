@@ -16,26 +16,26 @@ Ritwik : 3
 Sai : 4
 Hari : 4
 Reyrey : 4
-Will : 4
-Joel : 5
-Daniyal : 5
-Ryan : 5
-Dheeraj : 5
+Sohan KE2 : 5
+Will : 6
 Praneeth : 6
 Prashanth ML : 6
-Sohan KE2 : 6
 Nick : 6
+Ryan : 6
+Dheeraj : 6
+Oj : 6
+Darshan : 6
 
 # Beginner
-Minu : 7
 Rohit : 7
+Minu : 7
+Daniyal : 8
 Nancy : 8
 Inson KE : 8
 Yuhang : 8
-Oj : 8
 Dhiv : 8
-Darshan : 8
 AC : 8
 Adwait : 8
+Joel : 9
 Sachin : 9
 Cindy : 9
