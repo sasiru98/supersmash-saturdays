@@ -418,22 +418,38 @@ def save_data(data):
 
 
 def git_push_initial():
-    print("\n  Pushing initial index.html to GitHub Pages...")
+    print("\n  Pushing to GitHub Pages...")
     try:
-        # Import here to reuse the generator
         from generate_index import generate_index
         generate_index()
 
-        cmds = [
-            ["git", "add", "index.html"],
-            ["git", "commit", "-m", "Initial tournament setup"],
-            ["git", "push", "origin", "main"],
-        ]
-        for cmd in cmds:
-            result = subprocess.run(cmd, capture_output=True, text=True, cwd=_REPO_ROOT)
-            if result.returncode != 0:
-                print(f"  Git error: {result.stderr.strip()}")
+        def run(cmd):
+            r = subprocess.run(cmd, capture_output=True, text=True, cwd=_REPO_ROOT)
+            if r.returncode != 0:
+                err = r.stderr.strip()
+                if "nothing to commit" in err:
+                    return True
+                print(f"  Git error: {err}")
                 return False
+            return True
+
+        if not run(["git", "checkout", "dev"]):
+            return False
+        if not run(["git", "add", "index.html", "players.txt"]):
+            return False
+        if not run(["git", "commit", "-m", "Initial tournament setup"]):
+            return False
+        if not run(["git", "push", "origin", "dev"]):
+            return False
+        if not run(["git", "checkout", "main"]):
+            return False
+        if not run(["git", "merge", "dev", "--no-edit"]):
+            run(["git", "checkout", "dev"])
+            return False
+        if not run(["git", "push", "origin", "main"]):
+            run(["git", "checkout", "dev"])
+            return False
+        run(["git", "checkout", "dev"])
         print("  Pushed to GitHub Pages successfully.")
         return True
     except Exception as e:
